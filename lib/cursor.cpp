@@ -1,11 +1,11 @@
 #include "main.hpp"
 
-static HWND desktop = NULL;
+static HWND desktop = nullptr;
 
 static void MoveCursor(const FunctionCallbackInfo<Value> & args) {
     Local<Context> ctx = args.GetIsolate()->GetCurrentContext();
     
-    if (desktop == NULL) {
+    if (desktop == nullptr) {
         desktop = GetDesktopWindow();
     }
     
@@ -21,8 +21,6 @@ static void MoveCursor(const FunctionCallbackInfo<Value> & args) {
 static void SendCursorEvent(const FunctionCallbackInfo<Value> & args) {
     Local<Context> ctx = args.GetIsolate()->GetCurrentContext();
     DWORD down, up;
-    
-    const unsigned char type = static_cast<unsigned char>(ARG_INT(args[1], ctx));
     
     switch (ARG_INT(args[0], ctx)) {
         case 0: {
@@ -43,6 +41,8 @@ static void SendCursorEvent(const FunctionCallbackInfo<Value> & args) {
         }
     }
     
+    const int type = ARG_INT(args[1], ctx);
+    
     if (type == 0) {
         mouse_event(down, 0, 0, 0, 0);
     }
@@ -55,6 +55,6 @@ static void SendCursorEvent(const FunctionCallbackInfo<Value> & args) {
 BINDING_MAIN(exports, module, context) {
     Binding binding(exports, context);
     
-    binding.Export("moveCursor", MoveCursor);
+    binding.Export("moveCursor",      MoveCursor);
     binding.Export("sendCursorEvent", SendCursorEvent);
 }

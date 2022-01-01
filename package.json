@@ -1,0 +1,6 @@
+{
+	"name": "macro.js",
+	"description": "A npm package that lets you automate your windows desktop.",
+	"version": "0.0.1",
+	"main": "./src/index.js"
+}
