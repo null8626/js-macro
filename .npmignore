@@ -1,0 +1,13 @@
+build/*.sln
+build/*.gypi
+build/*.vcxproj
+build/*.filters
+build/Release/*.exp
+build/Release/*.iobj
+build/Release/*.ipdb
+build/Release/*.lib
+build/Release/*.pdb
+build/Release/obj
+
+lib/
+LICENSE
