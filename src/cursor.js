@@ -1,9 +1,14 @@
 "use strict";
 
 const cursor = require("../build/Release/cursor");
+const { validateInt } = require("./util");
 
 module.exports = {
-    move:          cursor.moveCursor,
+    move: (x, y) => {
+        validateInt(x, y);
+        cursor.moveCursor(x, y);
+    },
+    
     leftHold:      () => cursor.sendCursorEvent(0, 0),
     leftRelease:   () => cursor.sendCursorEvent(0, 1),
     leftClick:     () => cursor.sendCursorEvent(0, 2),

@@ -1,21 +1,9 @@
 #include "main.hpp"
 
-static HWND desktop = nullptr;
-
 static void MoveCursor(const FunctionCallbackInfo<Value> & args) {
     Local<Context> ctx = args.GetIsolate()->GetCurrentContext();
     
-    if (desktop == nullptr) {
-        desktop = GetDesktopWindow();
-    }
-    
-    const int x = ARG_INT(args[0], ctx);
-    const int y = ARG_INT(args[1], ctx);
-    
-    POINT point = { x, y };
-    
-    ClientToScreen(desktop, &point);
-    SetCursorPos(x, y);
+    SetCursorPos(ARG_INT(args[0], ctx), ARG_INT(args[1], ctx));
 }
 
 static void SendCursorEvent(const FunctionCallbackInfo<Value> & args) {
@@ -43,11 +31,11 @@ static void SendCursorEvent(const FunctionCallbackInfo<Value> & args) {
     
     const int type = ARG_INT(args[1], ctx);
     
-    if (type == 0) {
+    if (type == 0 || type == 2) {
         mouse_event(down, 0, 0, 0, 0);
     }
     
-    if (type == 1) {
+    if (type >= 1) {
         mouse_event(up, 0, 0, 0, 0);
     }
 }
