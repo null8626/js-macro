@@ -1,5 +1,6 @@
 "use strict";
 
 module.exports = {
-    cursor: require("./cursor")
+    cursor: require("./cursor"),
+    window: require("./window")
 };

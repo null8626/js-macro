@@ -1,13 +1,15 @@
 #include "main.hpp"
 
 static void MoveCursor(const FunctionCallbackInfo<Value> & args) {
-    Local<Context> ctx = args.GetIsolate()->GetCurrentContext();
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
     
     SetCursorPos(ARG_INT(args[0], ctx), ARG_INT(args[1], ctx));
 }
 
 static void SendCursorEvent(const FunctionCallbackInfo<Value> & args) {
-    Local<Context> ctx = args.GetIsolate()->GetCurrentContext();
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
     DWORD down, up;
     
     switch (ARG_INT(args[0], ctx)) {
@@ -40,9 +42,32 @@ static void SendCursorEvent(const FunctionCallbackInfo<Value> & args) {
     }
 }
 
+static void GetCursorPosition(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    POINT pnt;
+    
+    if (!GetCursorPos(&pnt)) {
+        pnt.x = 0;
+        pnt.y = 0;
+    }
+    
+    Local<Object> output = Object::New(isolate);
+
+    Local<String> xKey = STRING(isolate, "x", 1);
+    Local<String> yKey = STRING(isolate, "y", 1);
+    
+    output->Set(ctx, xKey, NUMBER(isolate, pnt.x));
+    output->Set(ctx, yKey, NUMBER(isolate, pnt.y));
+    
+    ARG(args, output);
+}
+
 BINDING_MAIN(exports, module, context) {
     Binding binding(exports, context);
     
     binding.Export("moveCursor",      MoveCursor);
     binding.Export("sendCursorEvent", SendCursorEvent);
+    binding.Export("getCursorPos",    GetCursorPosition);
 }
