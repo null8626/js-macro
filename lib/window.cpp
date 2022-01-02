@@ -8,7 +8,7 @@ typedef struct {
 static HWND desktop = nullptr;
 
 static BOOL CALLBACK EnumerateWindowsCallback(HWND hwnd, LPARAM ptr) {
-    if (!IsWindow(hwnd) || !IsWindowVisible(hwnd)) {
+    if (!IsWindow(hwnd)) {
         return TRUE;
     }
     
@@ -74,24 +74,45 @@ static void Close(const FunctionCallbackInfo<Value> & args) {
     Local<Context> ctx = args.GetIsolate()->GetCurrentContext();
     PostMessage(reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value()), WM_CLOSE, 0, 0);
 }
-/* wip
+
 static void SendKeyboard(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
     
-    DWORD processId, thread;
-    thread = GetWindowThreadProcessId(reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value()), &processId);
+    HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
     
     int length = args[1]->ToString(ctx).ToLocalChecked()->Length();
     const char * str = *(String::Utf8Value(isolate, args[1]));
     
-    printf("%d '%s'\n", length, str);
-    
     for (int i = 0; i < length; i++) {
-        PostThreadMessageA(thread, WM_KEYDOWN, str[i], 1);
+        PostMessageA(hwnd, WM_CHAR, static_cast<WPARAM>(str[i]), (LPARAM)1);
     }
 }
-*/
+
+static void GetTitle(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
+    
+    int length = GetWindowTextLengthW(hwnd) + 1;
+    
+    if (!length) {
+        ARG(args, String::Empty(isolate));
+        return;
+    }
+    
+    uint16_t * ptr = new uint16_t[length];
+    ptr[length - 1] = 0;
+    
+    GetWindowTextW(hwnd, (wchar_t *)(&ptr[0]), length);
+    
+    ARG(args, String::NewFromTwoByte(isolate, const_cast<const uint16_t *>(ptr), NewStringType
+::kNormal, length - 1).ToLocalChecked());
+    
+    delete[] ptr;
+}
+
 BINDING_MAIN(exports, module, context) {
     Binding binding(exports, context);
     
@@ -100,5 +121,6 @@ BINDING_MAIN(exports, module, context) {
     binding.Export("getForeground",    GetForeground);
     binding.Export("find",             Find);
     binding.Export("close",            Close);
-    // binding.Export("sendKeyboard",     SendKeyboard);
+    binding.Export("sendKeyboard",     SendKeyboard);
+    binding.Export("getTitle",         GetTitle);
 }
