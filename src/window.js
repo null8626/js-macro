@@ -4,35 +4,33 @@ const window = require("../build/Release/window");
 const { validateString } = require("./util");
 const { inspect } = require("util");
 
-class Window {
+class ChildWindow {
     #ptr;
-    #title;
+    #jsClassName;
     
-    constructor(ptr) {
+    constructor(ptr, name = "ChildWindow") {
         this.#ptr = ptr;
-        this.#title = null;
+        this.#jsClassName = name;
     }
     
     [inspect.custom]() {
-        return `Window[0x${this.#ptr.toString(16)}] ` + inspect({
-            title: this.title
-        });
+        return `${this.#jsClassName}(0x${this.#ptr.toString(16).padStart(8, '0')})`;
     }
     
     get memoryLocation() {
         return this.#ptr;
     }
     
-    get title() {
-        return (this.#title ?? (this.#title = window.getTitle(this.#ptr)));
+    getText() {
+        return window.getTitle(this.#ptr);
     }
     
-    focus() {
-        window.setForeground(this.#ptr);
+    getClassName() {
+        return window.getClass(this.#ptr);
     }
     
-    close() {
-        window.close(this.#ptr);
+    getChild() {
+        return window.enumerateWindows(this.#ptr).map(x => new ChildWindow(x));
     }
     
     type(text) {
@@ -41,8 +39,22 @@ class Window {
     }
 }
 
+class Window extends ChildWindow {
+    constructor(ptr) {
+        super(ptr, "Window");
+    }
+    
+    focus() {
+        window.setForeground(this.memoryLocation);
+    }
+    
+    close() {
+        window.close(this.memoryLocation);
+    }
+}
+
 module.exports = {
-    getAll:     () => window.enumerateWindows().filter(ptr => ptr).map(ptr => new Window(ptr)),
+    getAll:     () => window.enumerateWindows().map(ptr => new Window(ptr)),
     desktop:    () => new Window(window.find()),
     foreground: window.getForeground,
     find:       str => {

@@ -25,12 +25,18 @@ static void EnumerateWindows(const FunctionCallbackInfo<Value> & args) {
     Local<Context> ctx = isolate->GetCurrentContext();
     
     EnumWindowsData data = { 0 };
-    EnumWindows(EnumerateWindowsCallback, reinterpret_cast<LPARAM>(&data));
+    
+    if (!args.Length()) {
+        EnumWindows(EnumerateWindowsCallback, reinterpret_cast<LPARAM>(&data));
+    } else {
+        EnumChildWindows(reinterpret_cast<HWND>(args[1]->ToBigInt(ctx).ToLocalChecked()->Uint64Value()),
+                         EnumerateWindowsCallback, reinterpret_cast<LPARAM>(&data));
+    }
     
     Local<Array> array = Array::New(isolate, data.index);
     
     for (unsigned short i = 0; i < data.index; i++) {
-        array->Set(ctx, i, BigInt::NewFromUnsigned(isolate, reinterpret_cast<unsigned __int64>(data.hwnd[i])));
+        array->Set(ctx, i, BigInt::NewFromUnsigned(isolate, reinterpret_cast<uint64_t>(data.hwnd[i])));
     }
     
     ARG(args, array);
@@ -49,7 +55,7 @@ static void SetForeground(const FunctionCallbackInfo<Value> & args) {
 
 static void GetForeground(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
-    ARG(args, BigInt::New(isolate, reinterpret_cast<unsigned __int64>(GetForegroundWindow())));
+    ARG(args, BigInt::New(isolate, reinterpret_cast<uint64_t>(GetForegroundWindow())));
 }
 
 static void Find(const FunctionCallbackInfo<Value> & args) {
@@ -60,14 +66,14 @@ static void Find(const FunctionCallbackInfo<Value> & args) {
             desktop = GetDesktopWindow();
         }
         
-        ARG(args, BigInt::New(isolate, reinterpret_cast<unsigned __int64>(desktop)));
+        ARG(args, BigInt::New(isolate, reinterpret_cast<uint64_t>(desktop)));
         return;
     }
     
     Local<Context> ctx = isolate->GetCurrentContext();
     
     char * str = *(String::Utf8Value(isolate, args[0]));
-    ARG(args, BigInt::New(isolate, reinterpret_cast<unsigned __int64>(FindWindowA(nullptr, str))));
+    ARG(args, BigInt::New(isolate, reinterpret_cast<uint64_t>(FindWindowA(nullptr, str))));
 }
 
 static void Close(const FunctionCallbackInfo<Value> & args) {
@@ -87,6 +93,21 @@ static void SendKeyboard(const FunctionCallbackInfo<Value> & args) {
     for (int i = 0; i < length; i++) {
         PostMessageA(hwnd, WM_CHAR, static_cast<WPARAM>(str[i]), (LPARAM)1);
     }
+}
+
+static void GetClass(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
+    
+    uint16_t ptr[1024];
+    
+    int size = GetWindowTextW(hwnd, (wchar_t *)(&ptr[0]), 1024);
+    ptr[size] = 0;
+    
+    ARG(args, String::NewFromTwoByte(isolate, const_cast<const uint16_t *>(&ptr[0]), NewStringType
+::kNormal, size).ToLocalChecked());
 }
 
 static void GetTitle(const FunctionCallbackInfo<Value> & args) {
@@ -123,4 +144,5 @@ BINDING_MAIN(exports, module, context) {
     binding.Export("close",            Close);
     binding.Export("sendKeyboard",     SendKeyboard);
     binding.Export("getTitle",         GetTitle);
+    binding.Export("getClass",         GetClass);
 }
