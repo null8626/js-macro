@@ -19,7 +19,7 @@ cursor.leftClick();
 ```js
 const { Worker, isMainThread } = require("worker_threads");
 const { execSync } = require("child_process");
-const { window } = require("./src/index");
+const { window } = require("macro.js");
 
 if (!isMainThread) {
     execSync("notepad.exe");
