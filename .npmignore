@@ -9,5 +9,8 @@ build/Release/*.lib
 build/Release/*.pdb
 build/Release/obj
 
+deps/include/
+deps/install.ps1
+
 lib/
 LICENSE
