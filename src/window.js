@@ -57,10 +57,11 @@ module.exports = {
     all:        () => window.enumerateWindows().map(ptr => new Window(ptr)),
     desktop:    () => new Window(window.find()),
     foreground: window.getForeground,
+    console:    window.console,
     find:       str => {
-        validateString(str);
-        
-        const hwnd = window.find(str);
-        return hwnd ? new Window(hwnd) : null;
-    }
+                    validateString(str);
+                    
+                    const hwnd = window.find(str);
+                    return hwnd ? new Window(hwnd) : null;
+                }
 };

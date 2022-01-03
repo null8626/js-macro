@@ -76,6 +76,12 @@ static void Find(const FunctionCallbackInfo<Value> & args) {
     ARG(args, BigInt::New(isolate, reinterpret_cast<uint64_t>(FindWindowA(nullptr, str))));
 }
 
+static void Console(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    
+    ARG(args, BigInt::New(isolate, reinterpret_cast<uint64_t>(GetConsoleWindow())));
+}
+
 static void Close(const FunctionCallbackInfo<Value> & args) {
     Local<Context> ctx = args.GetIsolate()->GetCurrentContext();
     PostMessage(reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value()), WM_CLOSE, 0, 0);
@@ -145,4 +151,5 @@ BINDING_MAIN(exports, module, context) {
     binding.Export("sendKeyboard",     SendKeyboard);
     binding.Export("getTitle",         GetTitle);
     binding.Export("getClass",         GetClass);
+    binding.Export("console",          Console);
 }
