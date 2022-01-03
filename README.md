@@ -15,15 +15,11 @@ cursor.move(0, 0);
 
 cursor.leftClick();
 ```
-- Closing this very node window
+- Automatically typing on the console
 ```js
-const { window } = require("macro.js");
+const { window } = require("./src/index");
 
-process.title = "my title";
+const consoleWindow = window.console();
 
-const win = window.find("my title");
-
-if (win) {
-  win.close();
-}
+consoleWindow.type("Hello, World!");
 ```
