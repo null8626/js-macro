@@ -55,3 +55,19 @@ const desktop = window.desktop();
 desktop.screenshot(0, 0, "file.png").then(() => console.log("screenshotted!"));
 desktop.screenshot(0, 0, 500, 500).then(buf => /* ... */);
 ```
+## Building
+To build the library and it's dependencies, you need:
+
+- Visual C++ Build Environment
+- Powershell v5.0+
+
+To install the dependencies, open powershell and do the following:
+```ps1
+cd deps
+.\install.ps1
+```
+To build the library, go to the root directory and do the following:
+```bat
+npm i -g node-gyp
+node-gyp rebuild
+```
