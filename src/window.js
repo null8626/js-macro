@@ -56,8 +56,8 @@ class Window extends ChildWindow {
 module.exports = {
     all:        () => window.enumerateWindows().map(ptr => new Window(ptr)),
     desktop:    () => new Window(window.find()),
-    foreground: window.getForeground,
-    console:    window.console,
+    foreground: () => new Window(window.getForeground()),
+    console:    () => new Window(window.console()),
     find:       str => {
                     validateString(str);
                     

@@ -29,7 +29,7 @@ static void EnumerateWindows(const FunctionCallbackInfo<Value> & args) {
     if (!args.Length()) {
         EnumWindows(EnumerateWindowsCallback, reinterpret_cast<LPARAM>(&data));
     } else {
-        EnumChildWindows(reinterpret_cast<HWND>(args[1]->ToBigInt(ctx).ToLocalChecked()->Uint64Value()),
+        EnumChildWindows(reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value()),
                          EnumerateWindowsCallback, reinterpret_cast<LPARAM>(&data));
     }
     
@@ -109,7 +109,12 @@ static void GetClass(const FunctionCallbackInfo<Value> & args) {
     
     uint16_t ptr[1024];
     
-    int size = GetWindowTextW(hwnd, (wchar_t *)(&ptr[0]), 1024);
+    int size = GetClassNameW(hwnd, (wchar_t *)(&ptr[0]), 1024);
+    if (size < 1) {
+        ARG(args, String::Empty(isolate));
+        return;
+    }
+    
     ptr[size] = 0;
     
     ARG(args, String::NewFromTwoByte(isolate, const_cast<const uint16_t *>(&ptr[0]), NewStringType
@@ -124,7 +129,7 @@ static void GetTitle(const FunctionCallbackInfo<Value> & args) {
     
     int length = GetWindowTextLengthW(hwnd) + 1;
     
-    if (!length) {
+    if (length <= 1) {
         ARG(args, String::Empty(isolate));
         return;
     }
