@@ -1,3 +1,4 @@
+#include "screenshot.hpp"
 #include "main.hpp"
 
 typedef struct {
@@ -145,6 +146,54 @@ static void GetTitle(const FunctionCallbackInfo<Value> & args) {
     delete[] ptr;
 }
 
+static void WindowBoundaries(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
+    
+    RECT rect;
+    GetWindowRect(hwnd, &rect);
+
+    Local<Object> object = Object::New(isolate);
+    object->Set(ctx, STRING(isolate, "width", 5),  NUMBER(isolate, rect.right - rect.left));
+    object->Set(ctx, STRING(isolate, "height", 6), NUMBER(isolate, rect.bottom - rect.top));
+    
+    ARG(args, object);
+}
+
+static void ScreenshotWindow(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
+    
+    const int x      = ARG_INT(args[1], ctx);
+    const int y      = ARG_INT(args[2], ctx);
+    const int width  = ARG_INT(args[3], ctx);
+    const int height = ARG_INT(args[4], ctx);
+    
+    Screenshot sc(x, y, width, height);
+
+    if (args.Length() == 6) {
+        const char * file = *(String::Utf8Value(isolate, args[5]));
+        sc.save(file);
+    } else {
+        ScreenshotBuffer buf = { nullptr, 0 };
+        sc.buffer(&buf);
+        
+        Local<Array> arr = Array::New(isolate, buf.size);
+        
+        // why node why
+        for (size_t i = 0; i < buf.size; i++) {
+            arr->Set(ctx, i, NUMBER(isolate, buf.buffer[i]));
+        }
+        
+        ARG(args, arr);
+        delete[] buf.buffer;
+    }
+}
+
 BINDING_MAIN(exports, module, context) {
     Binding binding(exports, context);
     
@@ -157,4 +206,6 @@ BINDING_MAIN(exports, module, context) {
     binding.Export("getTitle",         GetTitle);
     binding.Export("getClass",         GetClass);
     binding.Export("console",          Console);
+    binding.Export("boundaries",       WindowBoundaries);
+    binding.Export("screenshot",       ScreenshotWindow);
 }

@@ -1,8 +1,10 @@
 "use strict";
 
 const window = require("../build/Release/window");
-const { validateString } = require("./util");
+const { validateString, validateInt } = require("./util");
+const { Worker } = require("worker_threads");
 const { inspect } = require("util");
+const { join } = require("path");
 
 class ChildWindow {
     #ptr;
@@ -33,6 +35,10 @@ class ChildWindow {
         return window.enumerateWindows(this.#ptr).map(x => new ChildWindow(x));
     }
     
+    getBoundaries() {
+        return window.boundaries(this.#ptr);
+    }
+    
     type(text) {
         validateString(text);
         window.sendKeyboard(this.#ptr, text);
@@ -50,6 +56,37 @@ class Window extends ChildWindow {
     
     close() {
         window.close(this.memoryLocation);
+    }
+    
+    screenshot(x, y, width = null, height = null, file = null) {
+        if (typeof width === 'string' && arguments.length === 3) {
+            file = width;
+            width = null;
+        }
+        
+        let boundaries = { width, height };
+        
+        if (boundaries.width === null || boundaries.height === null) {
+            boundaries = this.getBoundaries();
+        }
+        
+        validateInt(x, y, boundaries.width, boundaries.height);
+        
+        if (file !== null) {
+            validateString(file);
+        }
+        
+        return new Promise(resolve => {
+            const worker = new Worker(join(__dirname, "screenshot.js"), {
+                workerData: { ptr: this.memoryLocation.toString(), x, y, file, ...boundaries }
+            });
+            
+            if (file === null) {
+                worker.on("message", buf => resolve(Buffer.from(buf)));
+            } else {
+                worker.on("exit", () => resolve());
+            }
+        });
     }
 }
 

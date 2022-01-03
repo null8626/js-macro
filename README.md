@@ -46,3 +46,12 @@ if (!isMainThread) {
     }, 1000);
 }
 ```
+- Screenshotting a window, or your desktop (like print-screen!)
+> The buffers will all be in a **PNG** format.
+```js
+const { window } = require("./src/index");
+const desktop = window.desktop();
+
+desktop.screenshot(0, 0, "file.png").then(() => console.log("screenshotted!"));
+desktop.screenshot(0, 0, 500, 500).then(buf => /* ... */);
+```
