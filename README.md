@@ -3,7 +3,7 @@ A npm package that lets you automate your windows desktop.
 > [Beta] not on npm yet!
 
 ## Example
-- Having fun with your cursor
+- Simple cursor usage
 ```js
 const { cursor } = require("macro.js");
 
@@ -15,9 +15,9 @@ cursor.move(0, 0);
 
 cursor.leftClick();
 ```
-- Automatically typing on the console
+- Automatically typing something on the console
 ```js
-const { window } = require("./src/index");
+const { window } = require("macro.js");
 
 const consoleWindow = window.console();
 
