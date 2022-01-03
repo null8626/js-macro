@@ -15,11 +15,34 @@ cursor.move(0, 0);
 
 cursor.leftClick();
 ```
-- Automatically typing something on the console
+- Typing something on notepad
 ```js
-const { window } = require("macro.js");
+const { Worker, isMainThread } = require("worker_threads");
+const { execSync } = require("child_process");
+const { window } = require("./src/index");
 
-const consoleWindow = window.console();
-
-consoleWindow.type("Hello, World!");
+if (!isMainThread) {
+    execSync("notepad.exe");
+} else {
+    // we don't want for execSync to wait for notepad to exit,
+    // so we should use a worker instead
+    void new Worker(__filename);
+    
+    // wait for notepad to start
+    setTimeout(() => {
+        const notepad = window.find("Untitled - Notepad");
+        
+        if (!notepad) {
+            return console.error("error: cannot find notepad :(");
+        }
+        
+        const textBox = notepad.getChild().find(x => x.getClassName() === "Edit");
+        
+        if (!textBox) {
+            return console.error("error: cannot find text box :(");
+        }
+        
+        textBox.type("Hello, World!");
+    }, 1000);
+}
 ```
