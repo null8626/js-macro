@@ -1,8 +1,10 @@
 # macro.js
 A npm package that lets you automate your windows desktop.
-> [Beta] not on npm yet!
+```
+npm i macro.js
+```
 
-## Example
+## Examples
 - Simple cursor usage
 ```js
 const { cursor } = require("macro.js");
