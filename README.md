@@ -1,13 +1,13 @@
-# macro-js
+# js-macro
 A npm package that lets you automate your windows desktop.
 ```
-npm i macro-js
+npm i js-macro
 ```
 
 ## Examples
 - Simple cursor usage
 ```js
-const { cursor } = require("macro-js");
+const { cursor } = require("js-macro");
 
 cursor.position();
 // { x: 679, y: 0 }
@@ -21,7 +21,7 @@ cursor.leftClick();
 ```js
 const { Worker, isMainThread } = require("worker_threads");
 const { execSync } = require("child_process");
-const { window } = require("macro-js");
+const { window } = require("js-macro");
 
 if (!isMainThread) {
     execSync("notepad.exe");
@@ -51,7 +51,7 @@ if (!isMainThread) {
 - Screenshotting a window, or your desktop (like print-screen!)
 > The buffers will all be in a **PNG** format.
 ```js
-const { window } = require("macro-js");
+const { window } = require("js-macro");
 const desktop = window.desktop();
 
 desktop.screenshot(0, 0, "file.png").then(() => console.log("screenshotted!"));

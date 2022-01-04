@@ -1,10 +1,10 @@
 {
-    "name": "macro-js",
+    "name": "js-macro",
     "description": "A npm package that lets you automate your windows desktop.",
     "version": "0.0.1",
     "main": "./src/index.js",
-    "homepage": "https://github.com/vierofernando/macro-js",
-    "repository": "git://github.com/vierofernando/macro-js.git",
+    "homepage": "https://github.com/vierofernando/js-macro",
+    "repository": "git://github.com/vierofernando/js-macro.git",
     "keywords": [
         "automation",
         "win32",
