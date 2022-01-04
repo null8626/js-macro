@@ -3,21 +3,21 @@
     {
       "target_name": "cursor",
       "sources": [
-        "lib/main.cpp",
-        "lib/cursor.cpp"
+        "<(PRODUCT_DIR)/../lib/main.cpp",
+        "<(PRODUCT_DIR)/../lib/cursor.cpp"
       ]
     },
     {
       "target_name": "window",
       "sources": [
-        "lib/main.cpp",
-        "lib/screenshot.cpp",
-        "lib/window.cpp"
+        "<(PRODUCT_DIR)/../lib/main.cpp",
+        "<(PRODUCT_DIR)/../lib/screenshot.cpp",
+        "<(PRODUCT_DIR)/../lib/window.cpp"
       ],
-      "include_dirs": [ "deps/include" ],
+      "include_dirs": [ "<(PRODUCT_DIR)/../deps/include" ],
       "libraries": [
-        "../deps/zlib.lib",
-        "../deps/libpng.lib",
+        "<(PRODUCT_DIR)/../deps/zlib.lib",
+        "<(PRODUCT_DIR)/../deps/libpng.lib",
         "gdi32.lib",
         "user32.lib"
       ],
