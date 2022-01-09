@@ -162,6 +162,33 @@ static void WindowBoundaries(const FunctionCallbackInfo<Value> & args) {
     ARG(args, object);
 }
 
+static void SetWindowPosition(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
+    
+    int x      = ARG_INT(args[1], ctx);
+    int y      = ARG_INT(args[2], ctx);
+    int width  = ARG_INT(args[3], ctx);
+    int height = ARG_INT(args[4], ctx);
+    
+    RECT rect;
+    GetWindowRect(hwnd, &rect);
+    
+    if (x == 0) {
+        x = rect.left;
+        y = rect.top;
+    }
+    
+    if (width == 0) {
+        width = rect.right - rect.left;
+        height = rect.bottom - rect.top;
+    }
+    
+    MoveWindow(hwnd, x, y, width, height, TRUE);
+}
+
 static void ScreenshotWindow(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
@@ -208,4 +235,5 @@ BINDING_MAIN(exports, module, context) {
     binding.Export("console",          Console);
     binding.Export("boundaries",       WindowBoundaries);
     binding.Export("screenshot",       ScreenshotWindow);
+    binding.Export("setWindowPos",     SetWindowPosition);
 }

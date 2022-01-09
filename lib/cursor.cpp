@@ -1,5 +1,59 @@
 #include "main.hpp"
 
+typedef struct {
+    const int x;
+    const int y;
+    unsigned short index;
+    HWND hwnd[1024];
+} EnumWindowsDataHover;
+
+static BOOL CALLBACK EnumerateWindowsCallbackHover(HWND hwnd, LPARAM ptr) {
+    if (!IsWindow(hwnd)) {
+        return TRUE;
+    }
+    
+    EnumWindowsDataHover * out = reinterpret_cast<EnumWindowsDataHover *>(ptr);
+    
+    RECT rect;
+    if (!GetWindowRect(hwnd, &rect)) {
+        return TRUE;
+    }
+    
+    const int x = rect.left;
+    const int y = rect.top;
+    const int width = x + (rect.right - rect.left);
+    const int height = y + (rect.bottom - rect.top);
+    
+    if (out->x > x && out->y > y && out->x < width && out->y < height) {
+        out->hwnd[out->index] = hwnd;
+        out->index++;
+    }
+    
+    return out->index != 1024;
+}
+
+static void IsHoveringOn(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    POINT pnt;
+    if (!GetCursorPos(&pnt)) {
+        pnt.x = 0;
+        pnt.y = 0;
+    }
+    
+    EnumWindowsDataHover data = { pnt.x, pnt.y, 0 };
+    EnumWindows(EnumerateWindowsCallbackHover, reinterpret_cast<LPARAM>(&data));
+ 
+    Local<Array> array = Array::New(isolate, data.index);
+    
+    for (unsigned short i = 0; i < data.index; i++) {
+        array->Set(ctx, i, BigInt::NewFromUnsigned(isolate, reinterpret_cast<uint64_t>(data.hwnd[i])));
+    }
+    
+    ARG(args, array);
+}
+
 static void MoveCursor(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
@@ -70,4 +124,5 @@ BINDING_MAIN(exports, module, context) {
     binding.Export("moveCursor",      MoveCursor);
     binding.Export("sendCursorEvent", SendCursorEvent);
     binding.Export("getCursorPos",    GetCursorPosition);
+    binding.Export("isHoveringOn",    IsHoveringOn);
 }

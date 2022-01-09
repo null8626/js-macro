@@ -39,6 +39,14 @@ class ChildWindow {
         return window.boundaries(this.#ptr);
     }
     
+    setPosition(x, y) {
+        window.setWindowPos(this.#ptr, x, y, 0, 0);
+    }
+    
+    setBoundaries(width, height) {
+        window.setWindowPos(this.#ptr, 0, 0, width, height);
+    }
+    
     type(text) {
         validateString(text);
         window.sendKeyboard(this.#ptr, text);
@@ -100,5 +108,7 @@ module.exports = {
                     
                     const hwnd = window.find(str);
                     return hwnd ? new Window(hwnd) : null;
-                }
+                },
+    
+    Window
 };

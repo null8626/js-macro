@@ -17,10 +17,10 @@
         "<(root_dir)/lib/screenshot.cpp",
         "<(root_dir)/lib/window.cpp"
       ],
-      "include_dirs": [ "deps/include" ],
+      "include_dirs": [ "<(root_dir)/include" ],
       "libraries": [
-        "-l<(root_dir)/deps/zlib.lib",
-        "-l<(root_dir)/deps/libpng.lib",
+        "-l<(root_dir)/zlib.lib",
+        "-l<(root_dir)/libpng.lib",
         "gdi32.lib",
         "user32.lib"
       ],
