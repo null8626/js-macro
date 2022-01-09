@@ -49,7 +49,7 @@ if (!isMainThread) {
 }
 ```
 - Screenshotting a window, or your desktop (like print-screen!)
-> The buffers will all be in a **PNG** format.
+> The buffers will ALWAYS be in a **PNG** format.
 ```js
 const { window } = require("js-macro");
 const desktop = window.desktop();
