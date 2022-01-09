@@ -40,10 +40,12 @@ class ChildWindow {
     }
     
     setPosition(x, y) {
+        validateInt(x, y);
         window.setWindowPos(this.#ptr, x, y, 0, 0);
     }
     
     setBoundaries(width, height) {
+        validateInt(width, height);
         window.setWindowPos(this.#ptr, 0, 0, width, height);
     }
     
