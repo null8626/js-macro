@@ -1,23 +1,26 @@
 {
+  "variables": {
+    "root_dir%": "<!(cd)"
+  },
   "targets": [
     {
       "target_name": "cursor",
       "sources": [
-        "<(PRODUCT_DIR)/../lib/main.cpp",
-        "<(PRODUCT_DIR)/../lib/cursor.cpp"
+        "<(root_dir)/lib/main.cpp",
+        "<(root_dir)/lib/cursor.cpp"
       ]
     },
     {
       "target_name": "window",
       "sources": [
-        "<(PRODUCT_DIR)/../lib/main.cpp",
-        "<(PRODUCT_DIR)/../lib/screenshot.cpp",
-        "<(PRODUCT_DIR)/../lib/window.cpp"
+        "<(root_dir)/lib/main.cpp",
+        "<(root_dir)/lib/screenshot.cpp",
+        "<(root_dir)/lib/window.cpp"
       ],
-      "include_dirs": [ "<(PRODUCT_DIR)/../deps/include" ],
+      "include_dirs": [ "deps/include" ],
       "libraries": [
-        "<(PRODUCT_DIR)/../deps/zlib.lib",
-        "<(PRODUCT_DIR)/../deps/libpng.lib",
+        "-l<(root_dir)/deps/zlib.lib",
+        "-l<(root_dir)/deps/libpng.lib",
         "gdi32.lib",
         "user32.lib"
       ],
