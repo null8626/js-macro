@@ -19,12 +19,7 @@ static BOOL CALLBACK EnumerateWindowsCallbackHover(HWND hwnd, LPARAM ptr) {
         return TRUE;
     }
     
-    const int x = rect.left;
-    const int y = rect.top;
-    const int width = x + (rect.right - rect.left);
-    const int height = y + (rect.bottom - rect.top);
-    
-    if (out->x > x && out->y > y && out->x < width && out->y < height) {
+    else if (out->x > rect.left && out->y > rect.top && out->x < rect.right && out->y < rect.bottom) {
         out->hwnd[out->index] = hwnd;
         out->index++;
     }

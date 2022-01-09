@@ -1,3 +1,5 @@
+"use strict";
+
 const { parentPort, workerData: { ptr, x, y, width, height, file } } = require("worker_threads");
 const { screenshot } = require("../build/Release/window");
 
