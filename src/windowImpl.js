@@ -49,12 +49,12 @@ class ChildWindow {
         validateInt(width, height);
         window.setWindowPos(this.#ptr, 0, 0, width, height);
     }
-    
+/*
     type(text) {
         validateString(text);
         window.sendKeyboard(this.#ptr, text);
     }
-    
+*/    
     getStyles() {
         const [ styles, extendedStyles ] = window.getWindowStyles(this.#ptr);
         

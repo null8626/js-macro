@@ -168,7 +168,7 @@ static void Close(const FunctionCallbackInfo<Value> & args) {
     Local<Context> ctx = args.GetIsolate()->GetCurrentContext();
     PostMessage(reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value()), WM_CLOSE, 0, 0);
 }
-
+/*
 static void SendKeyboard(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
@@ -182,7 +182,7 @@ static void SendKeyboard(const FunctionCallbackInfo<Value> & args) {
         PostMessageA(hwnd, WM_CHAR, static_cast<WPARAM>(str[i]), (LPARAM)1);
     }
 }
-
+*/
 static void GetClass(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
@@ -310,7 +310,7 @@ BINDING_MAIN(exports, module, context) {
     ConstantBindingExport(binding, "getForeground",    GetForeground);
     ConstantBindingExport(binding, "getDesktop",       GetDesktop);
     ConstantBindingExport(binding, "close",            Close);
-    ConstantBindingExport(binding, "sendKeyboard",     SendKeyboard);
+    // ConstantBindingExport(binding, "sendKeyboard",     SendKeyboard);
     ConstantBindingExport(binding, "getTitle",         GetTitle);
     ConstantBindingExport(binding, "getClass",         GetClass);
     ConstantBindingExport(binding, "console",          Console);

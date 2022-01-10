@@ -17,40 +17,6 @@ cursor.move(0, 0);
 
 cursor.leftClick();
 ```
-- Typing something on notepad
-```js
-const { Worker, isMainThread } = require("worker_threads");
-const { execSync } = require("child_process");
-const { window } = require("js-macro");
-
-if (!isMainThread) {
-    execSync("notepad.exe");
-} else {
-    // we don't want for execSync to wait for notepad to exit,
-    // so we should use a worker instead
-    void new Worker(__filename);
-    
-    // wait for notepad to start
-    setTimeout(() => {
-        let notepad = window.find("notepad.exe");
-        
-        if (!notepad.length) {
-            return console.error("error: cannot find notepad :(");
-        }
-        
-        // window.find returns a list - use the first element
-        notepad = notepad[0];
-        
-        const textBox = notepad.getChild().find(x => x.getClassName() === "Edit");
-        
-        if (!textBox) {
-            return console.error("error: cannot find text box :(");
-        }
-        
-        textBox.type("Hello, World!");
-    }, 1000);
-}
-```
 - Screenshotting a window, or your desktop (like print-screen!)
 > The buffers will ALWAYS be in a **PNG** format.
 ```js
