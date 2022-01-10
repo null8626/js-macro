@@ -34,12 +34,12 @@ if (!isMainThread) {
     setTimeout(() => {
         let notepad = window.find("notepad.exe");
         
-        if (!notepad) {
+        if (!notepad.length) {
             return console.error("error: cannot find notepad :(");
         }
-		
-		// window.find returns a list - use the first element
-		notepad = notepad[0];
+        
+        // window.find returns a list - use the first element
+        notepad = notepad[0];
         
         const textBox = notepad.getChild().find(x => x.getClassName() === "Edit");
         
