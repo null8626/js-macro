@@ -2,7 +2,7 @@
 
 const cursor = require("../build/Release/cursor");
 const { validateInt } = require("./util");
-const { Window } = require("./window");
+const Window = require("./windowImpl");
 
 module.exports = {
     move: (x, y) => {
