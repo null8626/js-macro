@@ -8,7 +8,7 @@ typedef struct {
 } EnumWindowsDataHover;
 
 static BOOL CALLBACK EnumerateWindowsCallbackHover(HWND hwnd, LPARAM ptr) {
-    if (!IsWindow(hwnd)) {
+    if ((GetWindowLong(hwnd, GWL_STYLE) & WS_VISIBLE) == 0) {
         return TRUE;
     }
     

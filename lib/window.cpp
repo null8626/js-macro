@@ -9,10 +9,6 @@ typedef struct {
 static HWND desktop = nullptr;
 
 static BOOL CALLBACK EnumerateWindowsCallback(HWND hwnd, LPARAM ptr) {
-    if (!IsWindow(hwnd)) {
-        return TRUE;
-    }
-    
     EnumWindowsData * out = reinterpret_cast<EnumWindowsData *>(ptr);
     
     out->hwnd[out->index] = hwnd;
