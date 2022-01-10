@@ -6,7 +6,95 @@ typedef struct {
     HWND hwnd[1024];
 } EnumWindowsData;
 
+typedef struct {
+    const char * input;
+    const unsigned short input_size;
+    unsigned short index;
+    HWND hwnd[1024];
+} EnumWindowsFilePathData;
+
 static HWND desktop = nullptr;
+
+static void GetWindowStyles(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
+    
+    LONG style   = GetWindowLongPtrA(hwnd, GWL_STYLE);
+    LONG exStyle = GetWindowLongPtrA(hwnd, GWL_EXSTYLE);
+    
+    Local<Array> array = Array::New(isolate, 2);
+   
+    array->Set(ctx, 0, Number::New(isolate, static_cast<double>(style)));
+    array->Set(ctx, 1, Number::New(isolate, static_cast<double>(exStyle)));
+    
+    ARG(args, array);
+}
+
+static bool filepathcmp(char * a, DWORD size_a, const char * b, const unsigned short size_b) {
+    if (size_b > size_a) {
+        return false;
+    }
+    
+    unsigned short size_b_copy = size_b - 1;
+    unsigned short matches = 0;
+    size_a--;
+    
+    do {
+        if (a[size_a] == b[size_b_copy]) {
+            matches++;
+        } else {
+            return false;
+        }
+        
+        size_a--;
+        size_b_copy--;
+    } while (size_b && size_a && a[size_a] != '\\');
+
+    return matches == size_b;
+}
+
+static BOOL CALLBACK EnumWindowsFilePathCallback(HWND hwnd, LPARAM ptr) {
+    EnumWindowsFilePathData * out = reinterpret_cast<EnumWindowsFilePathData *>(ptr);
+    
+    DWORD processId, size;
+    GetWindowThreadProcessId(hwnd, &processId);
+    size = 261;
+    
+    char path[261];
+    HANDLE process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, processId);
+    if (!QueryFullProcessImageNameA(process, 0, path, &size)) {
+        CloseHandle(process);
+        return TRUE;
+    }
+
+    CloseHandle(process);    
+    if (filepathcmp(path, size, out->input, out->input_size)) {
+        out->hwnd[out->index] = hwnd;
+        out->index++;
+    }
+    
+    return out->index != 1024;
+}
+
+static void GetHwndFromPath(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    const String::Utf8Value stringValue(isolate, args[0]);
+    
+    EnumWindowsFilePathData data = { *stringValue, static_cast<unsigned short>(stringValue.length()), 0 };    
+    EnumWindows(EnumWindowsFilePathCallback, reinterpret_cast<LPARAM>(&data));
+
+    Local<Array> array = Array::New(isolate, data.index);
+    
+    for (unsigned short i = 0; i < data.index; i++) {
+        array->Set(ctx, i, BigInt::NewFromUnsigned(isolate, reinterpret_cast<uint64_t>(data.hwnd[i])));
+    }
+    
+    ARG(args, array);
+}
 
 static BOOL CALLBACK EnumerateWindowsCallback(HWND hwnd, LPARAM ptr) {
     EnumWindowsData * out = reinterpret_cast<EnumWindowsData *>(ptr);
@@ -55,22 +143,10 @@ static void GetForeground(const FunctionCallbackInfo<Value> & args) {
     ARG(args, BigInt::New(isolate, reinterpret_cast<uint64_t>(GetForegroundWindow())));
 }
 
-static void Find(const FunctionCallbackInfo<Value> & args) {
+static void GetDesktop(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     
-    if (!args.Length()) {
-        if (desktop == nullptr) {
-            desktop = GetDesktopWindow();
-        }
-        
-        ARG(args, BigInt::New(isolate, reinterpret_cast<uint64_t>(desktop)));
-        return;
-    }
-    
-    Local<Context> ctx = isolate->GetCurrentContext();
-    
-    char * str = *(String::Utf8Value(isolate, args[0]));
-    ARG(args, BigInt::New(isolate, reinterpret_cast<uint64_t>(FindWindowA(nullptr, str))));
+    ARG(args, BigInt::New(isolate, reinterpret_cast<uint64_t>(GetDesktopWindow())));
 }
 
 static void Console(const FunctionCallbackInfo<Value> & args) {
@@ -220,16 +296,18 @@ static void ScreenshotWindow(const FunctionCallbackInfo<Value> & args) {
 BINDING_MAIN(exports, module, context) {
     Binding binding(exports, context);
     
-    binding.Export("enumerateWindows", EnumerateWindows);
-    binding.Export("setForeground",    SetForeground);
-    binding.Export("getForeground",    GetForeground);
-    binding.Export("find",             Find);
-    binding.Export("close",            Close);
-    binding.Export("sendKeyboard",     SendKeyboard);
-    binding.Export("getTitle",         GetTitle);
-    binding.Export("getClass",         GetClass);
-    binding.Export("console",          Console);
-    binding.Export("boundaries",       WindowBoundaries);
-    binding.Export("screenshot",       ScreenshotWindow);
-    binding.Export("setWindowPos",     SetWindowPosition);
+    ConstantBindingExport(binding, "enumerateWindows", EnumerateWindows);
+    ConstantBindingExport(binding, "setForeground",    SetForeground);
+    ConstantBindingExport(binding, "getForeground",    GetForeground);
+    ConstantBindingExport(binding, "getDesktop",       GetDesktop);
+    ConstantBindingExport(binding, "close",            Close);
+    ConstantBindingExport(binding, "sendKeyboard",     SendKeyboard);
+    ConstantBindingExport(binding, "getTitle",         GetTitle);
+    ConstantBindingExport(binding, "getClass",         GetClass);
+    ConstantBindingExport(binding, "console",          Console);
+    ConstantBindingExport(binding, "boundaries",       WindowBoundaries);
+    ConstantBindingExport(binding, "screenshot",       ScreenshotWindow);
+    ConstantBindingExport(binding, "setWindowPos",     SetWindowPosition);
+    ConstantBindingExport(binding, "getHwndFromPath",  GetHwndFromPath);
+    ConstantBindingExport(binding, "getWindowStyles",  GetWindowStyles);
 }

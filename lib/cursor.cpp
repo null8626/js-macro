@@ -8,10 +8,6 @@ typedef struct {
 } EnumWindowsDataHover;
 
 static BOOL CALLBACK EnumerateWindowsCallbackHover(HWND hwnd, LPARAM ptr) {
-    if ((GetWindowLong(hwnd, GWL_STYLE) & WS_VISIBLE) == 0) {
-        return TRUE;
-    }
-    
     EnumWindowsDataHover * out = reinterpret_cast<EnumWindowsDataHover *>(ptr);
     
     RECT rect;
@@ -96,7 +92,6 @@ static void GetCursorPosition(const FunctionCallbackInfo<Value> & args) {
     Local<Context> ctx = isolate->GetCurrentContext();
     
     POINT pnt;
-    
     if (!GetCursorPos(&pnt)) {
         pnt.x = 0;
         pnt.y = 0;
@@ -116,8 +111,8 @@ static void GetCursorPosition(const FunctionCallbackInfo<Value> & args) {
 BINDING_MAIN(exports, module, context) {
     Binding binding(exports, context);
     
-    binding.Export("moveCursor",      MoveCursor);
-    binding.Export("sendCursorEvent", SendCursorEvent);
-    binding.Export("getCursorPos",    GetCursorPosition);
-    binding.Export("isHoveringOn",    IsHoveringOn);
+    ConstantBindingExport(binding, "moveCursor",              MoveCursor);
+    ConstantBindingExport(binding, "sendCursorEvent",         SendCursorEvent);
+    ConstantBindingExport(binding, "getCursorPos",            GetCursorPosition);
+    ConstantBindingExport(binding, "isHoveringOn",            IsHoveringOn);
 }

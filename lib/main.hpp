@@ -16,6 +16,8 @@ using namespace v8;
 
 #define STRING(isolate, str, length) String::NewFromUtf8(isolate, str, NewStringType::kNormal, length).ToLocalChecked()
 
+#define ConstantBindingExport(a, b, c) a.Export(b, c, sizeof(b))
+
 class Binding {
     Isolate * isolate;
     const HandleScope handlescope;
@@ -28,7 +30,14 @@ class Binding {
     
     public:
         Binding(Local<Object> exports, Local<Context> ctx);
-        void Export(const char *, FunctionCallback);
+        inline void Export(const char * name, FunctionCallback callback, const size_t size) {
+            ctxFuncTemplate = FunctionTemplate::New(isolate, callback);
+            ctxFunc = ctxFuncTemplate->GetFunction(context).ToLocalChecked();
+            
+            funcname = String::NewFromUtf8(isolate, name, NewStringType::kInternalized, size - 1).ToLocalChecked();
+            ctxFunc->SetName(funcname);
+            exports->Set(context, funcname, ctxFunc);
+        }
 };
 
 #endif
