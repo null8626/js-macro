@@ -103,7 +103,7 @@ class ChildWindow {
         const [ styles, extendedStyles ] = window.getWindowStyles(this.#ptr);
         
         return { ...Object.fromEntries(windowStyles.map(([ K, V ]) => [ K, (styles & V) !== 0 ])), extended: {
-            ...Object.fromEntries(extendedWindowStyles.map(([ K, V ]) => [ K, (styles & V) !== 0 ]))
+            ...Object.fromEntries(extendedWindowStyles.map(([ K, V ]) => [ K, (extendedStyles & V) !== 0 ]))
         }};
     }
 }
