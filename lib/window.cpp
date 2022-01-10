@@ -15,6 +15,15 @@ typedef struct {
 
 static HWND desktop = nullptr;
 
+static void ShowWindowFunc(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
+    
+    ShowWindowAsync(hwnd, static_cast<int>(ARG_INT(args[1], ctx)));
+}
+
 static void GetWindowStyles(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
@@ -310,4 +319,5 @@ BINDING_MAIN(exports, module, context) {
     ConstantBindingExport(binding, "setWindowPos",     SetWindowPosition);
     ConstantBindingExport(binding, "getHwndFromPath",  GetHwndFromPath);
     ConstantBindingExport(binding, "getWindowStyles",  GetWindowStyles);
+    ConstantBindingExport(binding, "showWindow",       ShowWindowFunc);
 }

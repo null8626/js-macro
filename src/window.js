@@ -151,6 +151,26 @@ class Window extends ChildWindow {
             }
         });
     }
+    
+    hide() {
+        window.showWindow(this.memoryLocation, 0);
+    }
+    
+    restore() {
+        window.showWindow(this.memoryLocation, 9);
+    }
+    
+    show() {
+        window.showWindow(this.memoryLocation, 5);
+    }
+    
+    maximize() {
+        window.showWindow(this.memoryLocation, 3);
+    }
+    
+    minimize(activate = false) {
+        window.showWindow(this.memoryLocation, activate ? 7 : 2);
+    }
 }
 
 module.exports = {
