@@ -2,5 +2,6 @@
 
 module.exports = {
     cursor: require("./cursor"),
-    window: require("./window")
+    window: require("./window"),
+	keyboard: require("./keyboard")
 };

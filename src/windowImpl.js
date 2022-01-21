@@ -1,6 +1,6 @@
 "use strict";
 
-const { window } = require("../build/Release/window");
+const window = require("../build/Release/window");
 const { validateString, validateInt } = require("./util");
 const { windowStyles, extendedWindowStyles } = require("./constants");
 const { Worker } = require("worker_threads");
@@ -49,12 +49,7 @@ class ChildWindow {
         validateInt(width, height);
         window.setWindowPos(this.#ptr, 0, 0, width, height);
     }
-/*
-    type(text) {
-        validateString(text);
-        window.sendKeyboard(this.#ptr, text);
-    }
-*/    
+
     getStyles() {
         const [ styles, extendedStyles ] = window.getWindowStyles(this.#ptr);
         

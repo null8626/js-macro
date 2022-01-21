@@ -1,7 +1,7 @@
 {
     "name": "js-macro",
     "description": "A npm package that lets you automate your windows desktop.",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "main": "./src/index.js",
     "homepage": "https://github.com/vierofernando/js-macro",
     "repository": "git://github.com/vierofernando/js-macro.git",
@@ -9,5 +9,11 @@
         "automation",
         "win32",
         "macros"
-    ]
+    ],
+    "author": "vierofernando",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/vierofernando/js-macro/issues"
+    },
+    "homepage": "https://github.com/vierofernando/js-macro#readme"
 }

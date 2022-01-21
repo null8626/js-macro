@@ -33,7 +33,25 @@
           }
         }
       }
+    },
+	{
+      "target_name": "keyboard",
+      "sources": [
+        "<(root_dir)/lib/main.cpp",
+        "<(root_dir)/lib/keyboard.cpp"
+      ],
+      "libraries": [
+        "user32.lib"
+      ],
+      "configurations": {
+        "Release": {
+          "msvs_settings": {
+            "VCCLCompilerTool": {
+              "RuntimeLibrary": "2"
+            }
+          }
+        }
+      }
     }
   ],
-  
 }

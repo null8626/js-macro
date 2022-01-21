@@ -2,6 +2,7 @@
 
 const window = require("../build/Release/window");
 const Window = require("./windowImpl");
+const { validateString } = require("./util");
 
 module.exports = {
     all:        () => window.enumerateWindows().map(ptr => new Window(ptr)),
