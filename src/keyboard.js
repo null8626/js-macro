@@ -2,7 +2,6 @@
 
 const keyboard = require("../build/Release/keyboard");
 const { virtualKeyCodes } = require("./constants");
-const { validateString } = require("./util");
 
 module.exports = {
     ...Object.fromEntries(virtualKeyCodes.map(([K, V]) => [ K, Object.assign(() => void keyboard.type(V, 42069), {

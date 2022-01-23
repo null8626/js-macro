@@ -1,7 +1,7 @@
 "use strict";
 
 const window = require("../build/Release/window");
-const { validateString, validateInt } = require("./util");
+const { validateInt } = require("./util");
 const { windowStyles, extendedWindowStyles } = require("./constants");
 const { Worker } = require("worker_threads");
 const { inspect } = require("util");
@@ -86,8 +86,8 @@ module.exports = class Window extends ChildWindow {
         
         validateInt(x, y, boundaries.width, boundaries.height);
         
-        if (file !== null) {
-            validateString(file);
+        if (file !== null && (typeof file !== 'string' || !file.length || /[\u0100-\uffff\0]/g.test(file))) {
+            throw new TypeError("Invalid string.")
         }
         
         return new Promise(resolve => {

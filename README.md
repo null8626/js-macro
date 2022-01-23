@@ -49,6 +49,15 @@ if (!isMainThread) {
     }, 1000);
 }
 ```
+- Copying and pasting programmatically!
+```js
+const { clipboard } = require("js-macro");
+
+clipboard.copy("Hello, World!");
+
+clipboard.paste();
+// returns "Hello, World!"
+```
 - Screenshotting a window, or your desktop (like print-screen!)
 > The buffers will ALWAYS be in a **PNG** format.
 ```js
