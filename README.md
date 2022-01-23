@@ -38,12 +38,8 @@ if (!isMainThread) {
             return console.error("error: cannot find notepad :(");
         }
         
-        // window.find returns a list - use the first element
-        notepad = notepad[0];
-        
-        if (!notepad.getChild().find(x => x.getClassName() === "Edit")) {
-            return console.error("error: cannot find text box :(");
-        }
+        // window.find returns an array - use the first element
+        notepad[0].focus();
         
         keyboard.type("Hello, World!");
     }, 1000);
