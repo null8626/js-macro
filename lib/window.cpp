@@ -7,7 +7,7 @@ typedef struct {
 } EnumWindowsData;
 
 typedef struct {
-    const char * input;
+    const wchar_t * input;
     const unsigned short input_size;
     unsigned short index;
     HWND hwnd[1024];
@@ -41,7 +41,7 @@ static void GetWindowStyles(const FunctionCallbackInfo<Value> & args) {
     ARG(args, array);
 }
 
-static bool filepathcmp(char * a, DWORD size_a, const char * b, const unsigned short size_b) {
+static bool filepathcmp(wchar_t * a, DWORD size_a, const wchar_t * b, const unsigned short size_b) {
     if (size_b > size_a) {
         return false;
     }
@@ -71,9 +71,9 @@ static BOOL CALLBACK EnumWindowsFilePathCallback(HWND hwnd, LPARAM ptr) {
     GetWindowThreadProcessId(hwnd, &processId);
     size = 261;
     
-    char path[261];
+    wchar_t path[261];
     HANDLE process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, processId);
-    if (!QueryFullProcessImageNameA(process, 0, path, &size)) {
+    if (!QueryFullProcessImageNameW(process, 0, path, &size)) {
         CloseHandle(process);
         return TRUE;
     }
@@ -91,9 +91,9 @@ static void GetHwndFromPath(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
     
-    const String::Utf8Value stringValue(isolate, args[0]);
+    const String::Value stringValue(isolate, args[0]);
     
-    EnumWindowsFilePathData data = { *stringValue, static_cast<unsigned short>(stringValue.length()), 0 };    
+    EnumWindowsFilePathData data = { (wchar_t *)(*stringValue), static_cast<unsigned short>(stringValue.length()), 0 };    
     EnumWindows(EnumWindowsFilePathCallback, reinterpret_cast<LPARAM>(&data));
 
     Local<Array> array = Array::New(isolate, data.index);
