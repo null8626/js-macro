@@ -269,23 +269,19 @@ static void ScreenshotWindow(const FunctionCallbackInfo<Value> & args) {
     
     Screenshot sc(x, y, width, height);
 
-    if (args[5]->IsString()) {
+    if (args.Length() == 6) {
         const char * file = *(String::Utf8Value(isolate, args[5]));
         sc.save(file);
     } else {
-        Local<Object> allocUnsafe = args[5]->ToObject(ctx).ToLocalChecked();
-        Local<Object> global = ctx->Global();
-        
         ScreenshotBuffer buf = { nullptr, 0 };
         sc.buffer(&buf);
         
-        Local<Value> _args[1] = { Number::New(isolate, static_cast<double>(buf.size)) };
-        Local<Object> buffer = allocUnsafe->CallAsFunction(ctx, global, 1, _args).ToLocalChecked()->ToObject(ctx).ToLocalChecked();
+        Local<Array> buffer = Array::New(isolate, buf.size);
         
         buf.size--;
-        while (1) {
+        while (buf.size) {
             buffer->Set(ctx, buf.size, Number::New(isolate, static_cast<double>(buf.buffer[buf.size])));
-        
+            
             if (buf.size == 0) {
                 break;
             }
