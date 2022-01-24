@@ -96,14 +96,112 @@ static void CombinePaths(wchar_t ** res, unsigned short * size, wchar_t * str, s
     res[0][i + j + 1] = 0;
 }
 
+static Local<String> v8_GetClipboardFormatName(Isolate * isolate, const UINT format) {
+    switch (format) {
+        case CF_TEXT:
+            return STRING_LITERAL(isolate, "CF_TEXT");
+        case CF_BITMAP:
+            return STRING_LITERAL(isolate, "CF_BITMAP");
+        case CF_METAFILEPICT:
+            return STRING_LITERAL(isolate, "CF_METAFILEPICT");
+        case CF_SYLK:
+            return STRING_LITERAL(isolate, "CF_SYLK");
+        case CF_DIF:
+            return STRING_LITERAL(isolate, "CF_DIF");
+        case CF_TIFF:
+            return STRING_LITERAL(isolate, "CF_TIFF");
+        case CF_OEMTEXT:
+            return STRING_LITERAL(isolate, "CF_OEMTEXT");
+        case CF_DIB:
+            return STRING_LITERAL(isolate, "CF_DIB");
+        case CF_PALETTE:
+            return STRING_LITERAL(isolate, "CF_PALETTE");
+        case CF_PENDATA:
+            return STRING_LITERAL(isolate, "CF_PENDATA");
+        case CF_RIFF:
+            return STRING_LITERAL(isolate, "CF_RIFF");
+        case CF_WAVE:
+            return STRING_LITERAL(isolate, "CF_WAVE");
+        case CF_UNICODETEXT:
+            return STRING_LITERAL(isolate, "CF_UNICODETEXT");
+        case CF_ENHMETAFILE:
+            return STRING_LITERAL(isolate, "CF_ENHMETAFILE");
+        case CF_HDROP:
+            return STRING_LITERAL(isolate, "CF_HDROP");
+        case CF_LOCALE:
+            return STRING_LITERAL(isolate, "CF_LOCALE");
+        case CF_DIBV5:
+            return STRING_LITERAL(isolate, "CF_DIBV5");
+        case CF_DSPTEXT:
+            return STRING_LITERAL(isolate, "CF_DSPTEXT");
+        case CF_DSPBITMAP:
+            return STRING_LITERAL(isolate, "CF_DSPBITMAP");
+        case CF_DSPMETAFILEPICT:
+            return STRING_LITERAL(isolate, "CF_DSPMETAFILEPICT");
+        case CF_DSPENHMETAFILE:
+            return STRING_LITERAL(isolate, "CF_DSPENHMETAFILE");
+        default: {
+            wchar_t string[513];
+            unsigned short len = ::GetClipboardFormatNameW(format, string, 512);
+        
+            return String::NewFromTwoByte(isolate, (uint16_t *)(&string[0]), NewStringType::kNormal, len).ToLocalChecked();
+        }
+    }
+}
+
 void Paste(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
+    ::OpenClipboard(NULL);
+    
+    if (args[0]->IsFunction()) {
+        Local<Object> result = Object::New(isolate);
+        Local<Object> allocUnsafe = args[0]->ToObject(ctx).ToLocalChecked();
+        Local<Object> global = ctx->Global();
+        UINT format = 0;
+        
+        Local<Value> _args[1];
+        unsigned char * ptr;
+        HANDLE handle;
+        uint32_t len;
+        
+        while (format = ::EnumClipboardFormats(format)) {
+            Local<String> str = ::v8_GetClipboardFormatName(isolate, format);
+            handle = ::GetClipboardData(format);
+            
+            if ((ptr = reinterpret_cast<unsigned char *>(::GlobalLock(handle))) == NULL) {
+                result->Set(ctx, str, Null(isolate));
+            } else {
+                len = static_cast<uint32_t>(::GlobalSize(handle));
+                
+                _args[0] = Number::New(isolate, static_cast<double>(len));
+                Local<Object> buffer = allocUnsafe->CallAsFunction(ctx, global, 1, _args).ToLocalChecked()->ToObject(ctx).ToLocalChecked();
+                
+                len--;
+                while (1) {
+                    buffer->Set(ctx, len, Number::New(isolate, static_cast<double>(ptr[len])));
+                    
+                    if (len == 0) {
+                        break;
+                    }
+                    
+                    len--;
+                }
+                
+                result->Set(ctx, str, buffer);
+            }
+            
+            ::GlobalUnlock(handle);
+        }
+        
+        ::CloseClipboard();
+        ARG(args, result);
+        return;
+    }
     
     const int type = ARG_INT(args[0], ctx);
-    ::OpenClipboard(NULL);
-    HANDLE handle = ::GetClipboardData(type);
     
+    HANDLE handle = ::GetClipboardData(type);
     if (handle == NULL) {
         ::CloseClipboard();
         return;

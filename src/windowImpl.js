@@ -4,8 +4,10 @@ const window = require("../build/Release/window");
 const { validateInt } = require("./util");
 const { windowStyles, extendedWindowStyles } = require("./constants");
 const { Worker } = require("worker_threads");
+const { resolve, join } = require("path");
 const { inspect } = require("util");
-const { join } = require("path");
+
+const WORKER_PATH = join(__dirname, "screenshot.js");
 
 class ChildWindow {
     #ptr;
@@ -90,15 +92,15 @@ module.exports = class Window extends ChildWindow {
             throw new TypeError("Invalid string.")
         }
         
-        return new Promise(resolve => {
-            const worker = new Worker(join(__dirname, "screenshot.js"), {
-                workerData: { ptr: this.memoryLocation.toString(), x, y, file, ...boundaries }
+        return new Promise(promiseResolve => {
+            const worker = new Worker(WORKER_PATH, {
+                workerData: { ptr: this.memoryLocation.toString(), x, y, file: file ? resolve(file) : null, ...boundaries }
             });
             
             if (file === null) {
-                worker.on("message", buf => resolve(Buffer.from(buf)));
+                worker.on("message", buf => promiseResolve(Buffer.from(buf)));
             } else {
-                worker.on("exit", () => resolve());
+                worker.on("exit", () => promiseResolve());
             }
         });
     }

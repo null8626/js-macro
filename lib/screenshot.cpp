@@ -8,9 +8,9 @@ static void pngWriteFunc(png_structp png_ptr, png_bytep data, png_size_t length)
     size_t nsize = p->size + length;
     
     if (p->buffer)
-        p->buffer = reinterpret_cast<char *>(realloc(p->buffer, nsize));
+        p->buffer = reinterpret_cast<unsigned char *>(realloc(p->buffer, nsize));
     else
-        p->buffer = reinterpret_cast<char *>(malloc(nsize));
+        p->buffer = reinterpret_cast<unsigned char *>(malloc(nsize));
     
     memcpy(p->buffer + p->size, data, length);
     p->size += length;

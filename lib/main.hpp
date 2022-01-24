@@ -16,6 +16,8 @@ using namespace v8;
 
 #define STRING(isolate, str, length) String::NewFromUtf8(isolate, str, NewStringType::kNormal, length).ToLocalChecked()
 
+#define STRING_LITERAL(isolate, str) String::NewFromUtf8(isolate, str, NewStringType::kNormal, sizeof(str) - 1).ToLocalChecked()
+
 #define ConstantBindingExport(a, b, c) a.Export(b, c, sizeof(b))
 
 class Binding {

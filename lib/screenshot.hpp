@@ -5,7 +5,7 @@
 #include <png.h>
 
 typedef struct {
-    char * buffer;
+    unsigned char * buffer;
     size_t size;
 } ScreenshotBuffer;
 
