@@ -24,7 +24,7 @@ module.exports = {
         } else {
             copyHTML(html);
         }
-    }
+    },
     
     clear: clipboard.empty,
     
