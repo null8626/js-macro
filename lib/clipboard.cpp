@@ -3,6 +3,11 @@
 #include <shlobj_core.h>
 #include <cstdio>
 #include <cstring>
+#include <string>
+#include <unordered_map>
+
+using std::string;
+typedef std::unordered_map<string, string> html_metadata_t;
 
 typedef struct {
     size_t size;
@@ -87,6 +92,26 @@ static void NumberString(char * str, const uint64_t number) {
     }
 }
 
+static void ParseHTMLMetadataToken(html_metadata_t & map, char * token) {
+    uint32_t value_len = 0;
+    uint8_t key_len = 0;
+    char c;
+    
+    while ((c = token[key_len]) != ':') {
+        key_len++;
+    }
+    
+    string key(token, key_len);
+    
+    while ((c = token[key_len])) {
+        key_len++;
+        value_len++;
+    }
+    
+    value_len--;
+    map[key] = string(token + key_len - value_len, value_len);
+}
+
 static HGLOBAL MakeHtmlString(const char * url, const int url_s, const char * html, const int html_s) {
     HGLOBAL global;
     char * ptr;
@@ -164,8 +189,8 @@ static void Copy(const FunctionCallbackInfo<Value> & args) {
     ::memcpy(::GlobalLock(glob_str), (wchar_t *)(*value), sizeof(wchar_t) * length);
     ::GlobalUnlock(glob_str);
     ::OpenClipboard(nullptr);
-    
     ::EmptyClipboard();
+    
     ::SetClipboardData(CF_UNICODETEXT, glob_str);
     ::CloseClipboard();
 }
@@ -214,7 +239,6 @@ static void CopyFiles(const FunctionCallbackInfo<Value> & args) {
 
 static void CopyHTML(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
-    Local<Context> ctx = isolate->GetCurrentContext();
     
     String::Utf8Value html(isolate, args[0]);
     HGLOBAL mem;
@@ -331,6 +355,59 @@ static void Paste(const FunctionCallbackInfo<Value> & args) {
     ::CloseClipboard();
 }
 
+static void PasteHTML(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    ::OpenClipboard(nullptr);
+    
+    HANDLE handle = nullptr;
+    UINT format;
+    char * ptr;
+    
+    if ((format = ::RegisterClipboardFormatA("HTML Format")) &&
+        (handle = ::GetClipboardData(format)) &&
+        (ptr = reinterpret_cast<char *>(::GlobalLock(handle)))) {
+        
+        Local<Object> obj = Object::New(isolate);
+        
+        char * token = nullptr;
+        html_metadata_t map;
+        
+        while (1) {
+            if (token == nullptr) {
+                token = ::strtok(ptr, "\r\n");
+            } else {
+                token = ::strtok(nullptr, "\r\n");
+            }
+            
+            if (token[0] == '<') {
+                break;
+            }
+            
+            ::ParseHTMLMetadataToken(map, token);
+        }
+        
+        obj->Set(ctx, STRING_LITERAL(isolate, "version"), String::NewFromUtf8(isolate, map["Version"].c_str()).ToLocalChecked());
+        
+        const int startFragment = ::atoi(map["StartFragment"].c_str());
+        obj->Set(ctx, STRING_LITERAL(isolate, "html"), String::NewFromUtf8(isolate, ptr + startFragment,
+                NewStringType::kNormal, ::atoi(map["EndFragment"].c_str()) - startFragment).ToLocalChecked());
+        
+        if (map.find("SourceURL") != map.end()) {
+            obj->Set(ctx, STRING_LITERAL(isolate, "url"), String::NewFromUtf8(isolate, map["SourceURL"].c_str()).ToLocalChecked());
+        }
+        
+        ARG(args, obj);
+    }
+    
+    if (handle != nullptr) {
+        ::GlobalUnlock(handle);
+    }
+    
+    ::CloseClipboard();
+}
+
 static void Empty(const FunctionCallbackInfo<Value> & args) {
     ::OpenClipboard(nullptr);
     ::EmptyClipboard();
@@ -343,5 +420,6 @@ BINDING_MAIN(exports, module, context) {
     ConstantBindingExport(binding, "copyFiles", CopyFiles);
     ConstantBindingExport(binding, "copyHTML", CopyHTML);
     ConstantBindingExport(binding, "paste", Paste);
+    ConstantBindingExport(binding, "pasteHTML", PasteHTML);
     ConstantBindingExport(binding, "empty", Empty);
 }

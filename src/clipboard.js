@@ -20,9 +20,9 @@ module.exports = {
         }
         
         if (typeof url === 'string' && url.length) {
-            copyHTML(html, url);
+            clipboard.copyHTML(html, url);
         } else {
-            copyHTML(html);
+            clipboard.copyHTML(html);
         }
     },
     
@@ -33,6 +33,7 @@ module.exports = {
         const worker = new Worker(WORKER_FILE_NAME, { workerData: { dir: resolve(dir) } });
         worker.on("exit", () => promiseResolve());
     }),
+	pasteHTML: clipboard.pasteHTML,
     
     pasteAll: () => clipboard.paste(BUFFER_ALLOCUNSAFE),
 };
