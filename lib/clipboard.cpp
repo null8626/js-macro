@@ -138,14 +138,14 @@ static HGLOBAL MakeHtmlString(const char * url, const int url_s, const char * ht
         ::NumberString(ptr + 69, 153ULL + url_s);
         ::NumberString(ptr + 93, 153ULL + url_s + html_s);
     } else {
-        global = ::GlobalAlloc(GHND, 178 + html_s);
+        global = ::GlobalAlloc(GHND, 178ULL + html_s);
         ptr = reinterpret_cast<char *>(::GlobalLock(global));
         
         ::sprintf(ptr,
             "Version:0.9\r\n"
-            "StartHTML:0000000117\r\n"
+            "StartHTML:0000000105\r\n"
             "EndHTML:0000000000\r\n"
-            "StartFragment:0000000153\r\n"
+            "StartFragment:0000000141\r\n"
             "EndFragment:0000000000\r\n"
             "<html>\r\n"
             "<body>\r\n"
