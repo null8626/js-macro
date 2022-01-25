@@ -10,6 +10,22 @@ const BUFFER_ALLOCUNSAFE = Buffer.allocUnsafe;
 module.exports = {
     copy: str => void clipboard.copy(str.replace(/\r?\n/g, "\r\n").replace(/\0/g, "\uFFFD") + "\0"),
     copyFiles: (...files) => void clipboard.copyFiles(...files.map(x => resolve(x.replace(/\0/g, "\uFFFD")) + "\0")),
+    copyHTML: (html, url) => {
+        html = html
+            ?.replace(/^(\s+)?(<html>)?(\s+)?(<body>)?(\s+)?/i, "")
+            ?.replace(/(\s+)?(<\/body>)?(\s+)?(<\/html>)?(\s+)?$/i, "");
+        
+        if (typeof html !== 'string' || !html.length) {
+            throw new TypeError("Invalid HTML.");
+        }
+        
+        if (typeof url === 'string' && url.length) {
+            copyHTML(html, url);
+        } else {
+            copyHTML(html);
+        }
+    }
+    
     clear: clipboard.empty,
     
     paste: () => clipboard.paste(13),
@@ -18,5 +34,5 @@ module.exports = {
         worker.on("exit", () => promiseResolve());
     }),
     
-    pasteAll: () => clipboard.paste(BUFFER_ALLOCUNSAFE)
+    pasteAll: () => clipboard.paste(BUFFER_ALLOCUNSAFE),
 };

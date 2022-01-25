@@ -71,7 +71,7 @@ static Local<String> v8_GetClipboardFormatName(Isolate * isolate, const UINT for
 }
 
 static void NumberString(char * str, const uint64_t number) {
-    const uint8_t s = snprintf(str, 10, "%llu", number);
+    const uint8_t s = ::snprintf(str, 10, "%llu", number);
     const uint8_t offset = 10 - s;
     uint8_t a = s - 1;
 
@@ -79,7 +79,7 @@ static void NumberString(char * str, const uint64_t number) {
         str[a + offset] = str[a];
         
         if (a == 0) {
-            memset(str, '0', offset);
+            ::memset(str, '0', offset);
             return;
         }
         
@@ -153,11 +153,7 @@ static void CombinePaths(wchar_t ** res, unsigned short * size, wchar_t * str, s
     res[0][i + j + 1] = 0;
 }
 
-void Open(const FunctionCallbackInfo<Value> & args) {
-    OpenClipboard(nullptr);
-}
-
-void Copy(const FunctionCallbackInfo<Value> & args) {
+static void Copy(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
     
@@ -174,7 +170,7 @@ void Copy(const FunctionCallbackInfo<Value> & args) {
     ::CloseClipboard();
 }
 
-void CopyFiles(const FunctionCallbackInfo<Value> & args) {
+static void CopyFiles(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
     
@@ -216,7 +212,7 @@ void CopyFiles(const FunctionCallbackInfo<Value> & args) {
     delete[] input_arr;
 }
 
-void CopyHTML(const FunctionCallbackInfo<Value> & args) {
+static void CopyHTML(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
     
@@ -231,6 +227,7 @@ void CopyHTML(const FunctionCallbackInfo<Value> & args) {
     }
     
     ::OpenClipboard(nullptr);
+    ::EmptyClipboard();
     
     UINT format = ::RegisterClipboardFormatA("HTML Format");
     ::SetClipboardData(format, mem);
@@ -238,7 +235,7 @@ void CopyHTML(const FunctionCallbackInfo<Value> & args) {
     ::CloseClipboard();
 }
 
-void Paste(const FunctionCallbackInfo<Value> & args) {
+static void Paste(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
     ::OpenClipboard(nullptr);
@@ -339,7 +336,7 @@ void Paste(const FunctionCallbackInfo<Value> & args) {
     ::CloseClipboard();
 }
 
-void Empty(const FunctionCallbackInfo<Value> & args) {
+static void Empty(const FunctionCallbackInfo<Value> & args) {
     ::OpenClipboard(nullptr);
     ::EmptyClipboard();
     ::CloseClipboard();
