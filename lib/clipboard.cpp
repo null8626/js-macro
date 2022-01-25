@@ -172,9 +172,9 @@ static void CombinePaths(wchar_t ** res, unsigned short * size, wchar_t * str, s
     
     *size = supposed_size;
     
-    wcscpy(*res, str);
+    ::wcscpy(*res, str);
     res[0][i] = L'\\';
-    wcscpy(*res + i + 1, append);
+    ::wcscpy(*res + i + 1, append);
     res[0][i + j + 1] = 0;
 }
 

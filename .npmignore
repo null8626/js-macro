@@ -8,3 +8,7 @@ build/Release/*.iobj
 build/Release/*.ipdb
 build/Release/*.pdb
 build/Release/obj
+binding.gyp
+include/
+*.lib
+lib/
