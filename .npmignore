@@ -9,6 +9,7 @@ build/Release/*.ipdb
 build/Release/*.pdb
 build/Release/obj
 binding.gyp
+src/build/
 include/
 *.lib
 lib/
