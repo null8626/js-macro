@@ -229,8 +229,7 @@ static void CopyHTML(const FunctionCallbackInfo<Value> & args) {
     ::OpenClipboard(nullptr);
     ::EmptyClipboard();
     
-    UINT format = ::RegisterClipboardFormatA("HTML Format");
-    ::SetClipboardData(format, mem);
+    ::SetClipboardData(::RegisterClipboardFormatA("HTML Format"), mem);
     
     ::CloseClipboard();
 }
@@ -295,14 +294,10 @@ static void Paste(const FunctionCallbackInfo<Value> & args) {
     
     switch (type) {
         case CF_UNICODETEXT: {
-            size_t len = 0;
-            uint16_t * str = reinterpret_cast<uint16_t *>(::GlobalLock(handle));
+            ARG(args, String::NewFromTwoByte(isolate,
+                reinterpret_cast<uint16_t *>(::GlobalLock(handle)), NewStringType::kNormal,
+                ::GlobalSize(handle)).ToLocalChecked());
             
-            while (str[len] != 0) {
-                len++;
-            }
-            
-            ARG(args, String::NewFromTwoByte(isolate, str, NewStringType::kNormal, len).ToLocalChecked());
             break;
         }
         
