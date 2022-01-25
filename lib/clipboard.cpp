@@ -1,75 +1,13 @@
 #include "main.hpp"
 
 #include <shlobj_core.h>
+#include <cstdio>
+#include <cstring>
 
 typedef struct {
     size_t size;
     wchar_t * str;
 } ClipboardWideString;
-
-void Open(const FunctionCallbackInfo<Value> & args) {
-    OpenClipboard(NULL);
-}
-
-void Copy(const FunctionCallbackInfo<Value> & args) {
-    Isolate * isolate = args.GetIsolate();
-    Local<Context> ctx = isolate->GetCurrentContext();
-    
-    String::Value value(isolate, args[0]);
-    const wchar_t * str = (wchar_t *)(*value);
-    const int length = value.length();
-    
-    HGLOBAL glob_str = ::GlobalAlloc(GMEM_MOVEABLE, sizeof(wchar_t) * length);
-    ::memcpy(::GlobalLock(glob_str), str, sizeof(wchar_t) * length);
-    ::GlobalUnlock(glob_str);
-    ::OpenClipboard(NULL);
-    
-    ::EmptyClipboard();
-    ::SetClipboardData(CF_UNICODETEXT, glob_str);
-    ::CloseClipboard();
-}
-
-void CopyFiles(const FunctionCallbackInfo<Value> & args) {
-    Isolate * isolate = args.GetIsolate();
-    Local<Context> ctx = isolate->GetCurrentContext();
-    
-    const int args_size = args.Length();
-    ClipboardWideString * input_arr = new ClipboardWideString[args_size];
-    
-    size_t hdrop_size = sizeof(DROPFILES) + 1;
-    int i;
-    
-    for (i = 0; i < args_size; i++) {
-        String::Value str_value(isolate, args[i]);
-        
-        input_arr[i].size = str_value.length() * sizeof(wchar_t);
-        hdrop_size += input_arr[i].size;
-        
-        input_arr[i].str = (wchar_t *)(*str_value);
-    }
-    
-    HGLOBAL hdrop = ::GlobalAlloc(GHND, hdrop_size);
-    
-    unsigned char * ptr = reinterpret_cast<unsigned char *>(::GlobalLock(hdrop));
-    DROPFILES * df = reinterpret_cast<DROPFILES *>(ptr);
-
-    df->pFiles = sizeof(DROPFILES);
-    df->fWide  = TRUE;
-    
-    hdrop_size = sizeof(DROPFILES);
-    for (i = 0; i < args_size; i++) {
-        ::memcpy(ptr + hdrop_size, input_arr[i].str, input_arr[i].size);
-        hdrop_size += input_arr[i].size;
-    }
-
-    ::GlobalUnlock(hdrop);
-    ::OpenClipboard(NULL);
-    ::EmptyClipboard();
-    ::SetClipboardData(CF_HDROP, hdrop);
-    ::CloseClipboard();
-    
-    delete[] input_arr;
-}
 
 static wchar_t * GetFileNameFromPath(wchar_t * str, short i) {
     while (i >= 0 && str[i] != L'\\') {
@@ -77,23 +15,6 @@ static wchar_t * GetFileNameFromPath(wchar_t * str, short i) {
     }
     
     return str + i + 1;
-}
-
-static void CombinePaths(wchar_t ** res, unsigned short * size, wchar_t * str, short i, wchar_t * append, unsigned short j) {    
-    const unsigned short supposed_size = i + j + 2;
-    
-    if (*res != NULL && supposed_size > *size) {
-        *res = reinterpret_cast<wchar_t *>(::realloc(*res, supposed_size * sizeof(wchar_t)));
-    } else if (*res == NULL) {
-        *res = reinterpret_cast<wchar_t *>(::malloc(supposed_size * sizeof(wchar_t)));
-    }
-    
-    *size = supposed_size;
-    
-    wcscpy(*res, str);
-    res[0][i] = L'\\';
-    wcscpy(*res + i + 1, append);
-    res[0][i + j + 1] = 0;
 }
 
 static Local<String> v8_GetClipboardFormatName(Isolate * isolate, const UINT format) {
@@ -149,10 +70,178 @@ static Local<String> v8_GetClipboardFormatName(Isolate * isolate, const UINT for
     }
 }
 
+static void NumberString(char * str, const uint64_t number) {
+    const uint8_t s = snprintf(str, 10, "%llu", number);
+    const uint8_t offset = 10 - s;
+    uint8_t a = s - 1;
+
+    while (1) {
+        str[a + offset] = str[a];
+        
+        if (a == 0) {
+            memset(str, '0', offset);
+            return;
+        }
+        
+        a--;
+    }
+}
+
+static HGLOBAL MakeHtmlString(const char * url, const int url_s, const char * html, const int html_s) {
+    HGLOBAL global;
+    char * ptr;
+
+    if (url != nullptr) {
+        global = ::GlobalAlloc(GHND, 190 + url_s + html_s);
+        ptr = reinterpret_cast<char *>(::GlobalLock(global));
+        
+        ::sprintf(ptr,
+            "Version:0.9\r\n"
+            "StartHTML:0000000000\r\n"
+            "EndHTML:0000000000\r\n"
+            "StartFragment:0000000000\r\n"
+            "EndFragment:0000000000\r\n"
+            "SourceURL:%s\r\n"
+            "<html>\r\n"
+            "<body>\r\n"
+            "<!--StartFragment-->%s<!--EndFragment-->\r\n"
+            "</body>\r\n"
+            "</html>", url, html);
+        
+        ::NumberString(ptr + 23, 117ULL + url_s);
+        ::NumberString(ptr + 43, 189ULL + url_s + html_s);
+        ::NumberString(ptr + 69, 153ULL + url_s);
+        ::NumberString(ptr + 93, 153ULL + url_s + html_s);
+    } else {
+        global = ::GlobalAlloc(GHND, 178 + html_s);
+        ptr = reinterpret_cast<char *>(::GlobalLock(global));
+        
+        ::sprintf(ptr,
+            "Version:0.9\r\n"
+            "StartHTML:0000000117\r\n"
+            "EndHTML:0000000000\r\n"
+            "StartFragment:0000000153\r\n"
+            "EndFragment:0000000000\r\n"
+            "<html>\r\n"
+            "<body>\r\n"
+            "<!--StartFragment-->%s<!--EndFragment-->\r\n"
+            "</body>\r\n"
+            "</html>", html);
+        
+        ::NumberString(ptr + 43, 177ULL + html_s);
+        ::NumberString(ptr + 93, 141ULL + html_s);
+    }
+    
+    ::GlobalUnlock(global);
+    return global;
+}
+
+static void CombinePaths(wchar_t ** res, unsigned short * size, wchar_t * str, short i, wchar_t * append, unsigned short j) {    
+    const unsigned short supposed_size = i + j + 2;
+    
+    if (*res != nullptr && supposed_size > *size) {
+        *res = reinterpret_cast<wchar_t *>(::realloc(*res, supposed_size * sizeof(wchar_t)));
+    } else if (*res == nullptr) {
+        *res = reinterpret_cast<wchar_t *>(::malloc(supposed_size * sizeof(wchar_t)));
+    }
+    
+    *size = supposed_size;
+    
+    wcscpy(*res, str);
+    res[0][i] = L'\\';
+    wcscpy(*res + i + 1, append);
+    res[0][i + j + 1] = 0;
+}
+
+void Open(const FunctionCallbackInfo<Value> & args) {
+    OpenClipboard(nullptr);
+}
+
+void Copy(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    String::Value value(isolate, args[0]);
+    const int length = value.length();
+    
+    HGLOBAL glob_str = ::GlobalAlloc(GMEM_MOVEABLE, sizeof(wchar_t) * length);
+    ::memcpy(::GlobalLock(glob_str), (wchar_t *)(*value), sizeof(wchar_t) * length);
+    ::GlobalUnlock(glob_str);
+    ::OpenClipboard(nullptr);
+    
+    ::EmptyClipboard();
+    ::SetClipboardData(CF_UNICODETEXT, glob_str);
+    ::CloseClipboard();
+}
+
+void CopyFiles(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    const int args_size = args.Length();
+    ClipboardWideString * input_arr = new ClipboardWideString[args_size];
+    
+    size_t hdrop_size = sizeof(DROPFILES) + 1;
+    int i;
+    
+    for (i = 0; i < args_size; i++) {
+        String::Value str_value(isolate, args[i]);
+        
+        input_arr[i].size = str_value.length() * sizeof(wchar_t);
+        hdrop_size += input_arr[i].size;
+        
+        input_arr[i].str = (wchar_t *)(*str_value);
+    }
+    
+    HGLOBAL hdrop = ::GlobalAlloc(GHND, hdrop_size);
+    
+    unsigned char * ptr = reinterpret_cast<unsigned char *>(::GlobalLock(hdrop));
+    DROPFILES * df = reinterpret_cast<DROPFILES *>(ptr);
+
+    df->pFiles = sizeof(DROPFILES);
+    df->fWide  = TRUE;
+    
+    hdrop_size = sizeof(DROPFILES);
+    for (i = 0; i < args_size; i++) {
+        ::memcpy(ptr + hdrop_size, input_arr[i].str, input_arr[i].size);
+        hdrop_size += input_arr[i].size;
+    }
+
+    ::GlobalUnlock(hdrop);
+    ::OpenClipboard(nullptr);
+    ::EmptyClipboard();
+    ::SetClipboardData(CF_HDROP, hdrop);
+    ::CloseClipboard();
+    
+    delete[] input_arr;
+}
+
+void CopyHTML(const FunctionCallbackInfo<Value> & args) {
+    Isolate * isolate = args.GetIsolate();
+    Local<Context> ctx = isolate->GetCurrentContext();
+    
+    String::Utf8Value html(isolate, args[0]);
+    HGLOBAL mem;
+    
+    if (args.Length() == 1) {
+        mem = ::MakeHtmlString(nullptr, 0, *html, html.length());
+    } else {
+        String::Utf8Value url(isolate, args[1]);
+        mem = ::MakeHtmlString(*url, url.length(), *html, html.length());
+    }
+    
+    ::OpenClipboard(nullptr);
+    
+    UINT format = ::RegisterClipboardFormatA("HTML Format");
+    ::SetClipboardData(format, mem);
+    
+    ::CloseClipboard();
+}
+
 void Paste(const FunctionCallbackInfo<Value> & args) {
     Isolate * isolate = args.GetIsolate();
     Local<Context> ctx = isolate->GetCurrentContext();
-    ::OpenClipboard(NULL);
+    ::OpenClipboard(nullptr);
     
     if (args[0]->IsFunction()) {
         Local<Object> result = Object::New(isolate);
@@ -169,7 +258,7 @@ void Paste(const FunctionCallbackInfo<Value> & args) {
             Local<String> str = ::v8_GetClipboardFormatName(isolate, format);
             handle = ::GetClipboardData(format);
             
-            if ((ptr = reinterpret_cast<unsigned char *>(::GlobalLock(handle))) == NULL) {
+            if ((ptr = reinterpret_cast<unsigned char *>(::GlobalLock(handle))) == nullptr) {
                 result->Set(ctx, str, Null(isolate));
             } else {
                 len = static_cast<uint32_t>(::GlobalSize(handle));
@@ -202,7 +291,7 @@ void Paste(const FunctionCallbackInfo<Value> & args) {
     const int type = ARG_INT(args[0], ctx);
     
     HANDLE handle = ::GetClipboardData(type);
-    if (handle == NULL) {
+    if (handle == nullptr) {
         ::CloseClipboard();
         return;
     }
@@ -229,13 +318,13 @@ void Paste(const FunctionCallbackInfo<Value> & args) {
             
             wchar_t * src_file_name;
             
-            wchar_t * dest_path = NULL;
+            wchar_t * dest_path = nullptr;
             unsigned short dest_path_len;
             
             wchar_t src_path[262];
             short src_path_len;
             
-            const uint32_t count = ::DragQueryFileW(hdrop, 0xFFFFFFFF, NULL, 0);
+            const uint32_t count = ::DragQueryFileW(hdrop, 0xFFFFFFFF, nullptr, 0);
             
             for (uint32_t i = 0; i < count; i++) {
                 src_file_name = ::GetFileNameFromPath(src_path, (src_path_len = static_cast<short>(::DragQueryFileW(hdrop, i, src_path, 262))));
@@ -251,7 +340,7 @@ void Paste(const FunctionCallbackInfo<Value> & args) {
 }
 
 void Empty(const FunctionCallbackInfo<Value> & args) {
-    ::OpenClipboard(NULL);
+    ::OpenClipboard(nullptr);
     ::EmptyClipboard();
     ::CloseClipboard();
 }
@@ -260,6 +349,7 @@ BINDING_MAIN(exports, module, context) {
     Binding binding(exports, context);
     ConstantBindingExport(binding, "copy", Copy);
     ConstantBindingExport(binding, "copyFiles", CopyFiles);
+    ConstantBindingExport(binding, "copyHTML", CopyHTML);
     ConstantBindingExport(binding, "paste", Paste);
     ConstantBindingExport(binding, "empty", Empty);
 }
