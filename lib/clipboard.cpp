@@ -320,7 +320,7 @@ static void Paste(const FunctionCallbackInfo<Value> & args) {
         case CF_UNICODETEXT: {
             ARG(args, String::NewFromTwoByte(isolate,
                 reinterpret_cast<uint16_t *>(::GlobalLock(handle)), NewStringType::kNormal,
-                ::GlobalSize(handle)).ToLocalChecked());
+                (::GlobalSize(handle) / sizeof(wchar_t)) - 1).ToLocalChecked());
             
             break;
         }
