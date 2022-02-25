@@ -27,7 +27,7 @@ Screenshot::Screenshot(const int x, const int y, const int width, const int heig
     BITMAPINFO inf;
     
     HDC currentDC = CreateCompatibleDC(0);
-    HBITMAP oldBitmap = (HBITMAP)SelectObject(currentDC, bitmap);
+    SelectObject(currentDC, bitmap);
     GetObject(bitmap, sizeof(BITMAP), &bmp);
 
     inf.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
