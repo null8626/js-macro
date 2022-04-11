@@ -1,4 +1,14 @@
-# js-macro
+# js-macro [![CI][ci-image]][ci-url] [![npm][npm-image]][npm-url] [![downloads][downloads-image]][downloads-url] [![prettier][prettier-image]][prettier-url]
+
+[ci-image]: https://github.com/vierofernando/js-macro/actions/workflows/lint.yml/badge.svg?branch=master
+[ci-url]: https://github.com/vierofernando/js-macro/actions/workflows/lint.yml
+[prettier-image]: https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square
+[prettier-url]: https://github.com/prettier/prettier
+[npm-image]: https://img.shields.io/npm/v/js-macro.svg
+[npm-url]: https://npmjs.org/package/js-macro
+[downloads-image]: https://img.shields.io/npm/dm/js-macro.svg
+[downloads-url]: https://npmjs.org/package/js-macro
+
 A npm package that lets you automate your windows desktop.
 ```
 npm i js-macro
@@ -7,7 +17,7 @@ npm i js-macro
 ## Examples
 - Simple cursor usage
 ```js
-const { cursor } = require("js-macro");
+import { cursor } from "js-macro";
 
 cursor.position();
 // { x: 679, y: 0 }
@@ -19,9 +29,9 @@ cursor.leftClick();
 ```
 - Typing something on notepad
 ```js
-const { Worker, isMainThread } = require("worker_threads");
-const { execSync } = require("child_process");
-const { window, keyboard } = require("js-macro");
+import { Worker, isMainThread } from "node:worker_threads";
+import { execSync } from "node:child_process";
+import { window, keyboard } from "js-macro";
 
 if (!isMainThread) {
     execSync("notepad.exe");
@@ -47,7 +57,7 @@ if (!isMainThread) {
 ```
 - Copying and pasting programmatically!
 ```js
-const { clipboard } = require("js-macro");
+import { clipboard } from "js-macro";
 
 clipboard.copy("Hello, World!");
 
@@ -57,7 +67,7 @@ clipboard.paste();
 - Screenshotting a window, or your desktop (like print-screen!)
 > The buffers will ALWAYS be in a **PNG** format.
 ```js
-const { window } = require("js-macro");
+import { window } from "js-macro";
 const desktop = window.desktop();
 
 desktop.screenshot(0, 0, "file.png").then(() => console.log("screenshotted!"));

@@ -10,7 +10,6 @@ const clipboard = require(fileURLToPath(join(import.meta.url, "..", "..", "build
 export type Option<T> = T | undefined | null;
 
 const WORKER_FILE_NAME: string = fileURLToPath(join(import.meta.url, "..", "pasteFiles.js"));
-const BUFFER_ALLOCUNSAFE: (size: number) => Buffer = Buffer.allocUnsafe;
 
 export function copy(str: string): void {
   clipboard.copy(`${str.replace(/\r?\n/g, "\r\n").replace(/\0/g, "\uFFFD")}\0`);
@@ -21,7 +20,7 @@ export function copyFiles(...files: string[]): void {
 }
 
 export function copyHTML(html: string, url: Option<string>): void {
-  html = html.replace(/^(\s+)?(<html>)?(\s+)?(<body>)?(\s+)?/i, "").replace(/(\s+)?(<\/body>)?(\s+)?(<\/html>)?(\s+)?$/i, "");
+  html = html.replace(/^\s*(?:<html>)?\s*(?:<body>)?\s*/i, "").replace(/\s*(?:<\/body>)?\s*(?:<\/html>)?\s*$/i, "");
 
   if (typeof url === "string" && url.length) {
     clipboard.copyHTML(html, url);
@@ -42,7 +41,7 @@ export function pasteFiles(dir: string): Promise<void> {
 }
 
 export function pasteAll(): void {
-  clipboard.paste(BUFFER_ALLOCUNSAFE);
+  clipboard.paste(Buffer.allocUnsafe);
 }
 
 export interface HTML {
