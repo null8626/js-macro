@@ -70,12 +70,22 @@ clipboard.paste();
 import { window } from "js-macro";
 const desktop = window.desktop();
 
-desktop.screenshot(0, 0, "file.png").then(() => console.log("screenshotted!"));
-desktop.screenshot(0, 0, 500, 500).then(buf => /* ... */);
+desktop.screenshot({
+  x: 0,
+  y: 0,
+  file: "file.png"
+}).then(() => console.log("screenshotted!"));
+
+desktop.screenshot({
+  x: 0,
+  y: 0,
+  width: 500,
+  height: 500
+}).then(buf => /* ... */);
 ```
 
 # Building locally
-```console
+```cmd
 git clone https://github.com/vierofernando/js-macro.git
 cd js-macro
 npm install --save-dev --ignore-scripts

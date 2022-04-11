@@ -80,6 +80,14 @@ class ChildWindow {
   }
 }
 
+export interface ScreenshotOptions {
+  x: number;
+  y: number;
+  width: Option<number>;
+  height: Option<number>;
+  file: Option<string>;
+}
+
 export default class Window extends ChildWindow {
   constructor(ptr: BigInt) {
     super(ptr, "Window");
@@ -93,29 +101,22 @@ export default class Window extends ChildWindow {
     window.close(this.memoryLocation);
   }
 
-  screenshot(x: number, y: number, width: Option<number> = null, height: Option<number> = null, file: Option<string> = null): Promise<void | Buffer> {
-    if (typeof width === "string" && arguments.length === 3) {
-      file = width;
-      width = null;
+  screenshot(options: ScreenshotOptions): Promise<void | Buffer> {
+    if (!options.width || !options.height) {
+      Object.assign(options, this.getBoundaries());
     }
 
-    let boundaries: MaybeBoundaries = { width, height };
+    validateInt(options.x, options.y, options.width!, options.height!);
 
-    if (boundaries.width === null || boundaries.height === null) {
-      boundaries = this.getBoundaries();
-    }
-
-    validateInt(x, y, boundaries.width!, boundaries.height!);
-
-    if (file !== null && (typeof file !== "string" || !file.length || /[\u0100-\uffff\0]/g.test(file))) {
+    if (options.file && (typeof options.file !== "string" || !options.file.length || /[\u0100-\uffff\0]/g.test(options.file))) {
       throw new TypeError("Invalid string.");
     }
 
     return new Promise(resolve => {
-      if (file === null) {
-        window.screenshot(x, y, boundaries.width, boundaries.height, (buf: number[]) => resolve(Buffer.from(buf)));
+      if (options.file) {
+        window.screenshot(options.x, options.y, options.width, options.height, resolve, options.file);
       } else {
-        window.screenshot(x, y, boundaries.width, boundaries.height, resolve, file);
+        window.screenshot(options.x, options.y, options.width, options.height, (buf: number[]) => resolve(Buffer.from(buf)));
       }
     });
   }
