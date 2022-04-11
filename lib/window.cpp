@@ -1,4 +1,9 @@
+#ifndef _WINSOCKAPI_
+#define _WINSOCKAPI_
+#endif
+
 #include "screenshot.hpp"
+#include "async.hpp"
 #include "main.hpp"
 
 typedef struct {
@@ -30,7 +35,7 @@ static void GetWindowStyles(const FunctionCallbackInfo<Value> & args) {
   
   HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
   
-  LONG style   = GetWindowLongPtrA(hwnd, GWL_STYLE);
+  LONG style = GetWindowLongPtrA(hwnd, GWL_STYLE);
   LONG exStyle = GetWindowLongPtrA(hwnd, GWL_EXSTYLE);
   
   Local<Array> array = Array::New(isolate, 2);
@@ -123,8 +128,7 @@ static void EnumerateWindows(const FunctionCallbackInfo<Value> & args) {
   if (!args.Length()) {
     EnumWindows(EnumerateWindowsCallback, reinterpret_cast<LPARAM>(&data));
   } else {
-    EnumChildWindows(reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value()),
-             EnumerateWindowsCallback, reinterpret_cast<LPARAM>(&data));
+    EnumChildWindows(reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value()), EnumerateWindowsCallback, reinterpret_cast<LPARAM>(&data));
   }
   
   Local<Array> array = Array::New(isolate, data.index);
@@ -223,7 +227,7 @@ static void WindowBoundaries(const FunctionCallbackInfo<Value> & args) {
   GetWindowRect(hwnd, &rect);
 
   Local<Object> object = Object::New(isolate);
-  object->Set(ctx, STRING(isolate, "width", 5),  NUMBER(isolate, rect.right - rect.left));
+  object->Set(ctx, STRING(isolate, "width", 5), NUMBER(isolate, rect.right - rect.left));
   object->Set(ctx, STRING(isolate, "height", 6), NUMBER(isolate, rect.bottom - rect.top));
   
   ARG(args, object);
@@ -235,9 +239,9 @@ static void SetWindowPosition(const FunctionCallbackInfo<Value> & args) {
   
   HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
   
-  int x    = ARG_INT(args[1], ctx);
-  int y    = ARG_INT(args[2], ctx);
-  int width  = ARG_INT(args[3], ctx);
+  int x = ARG_INT(args[1], ctx);
+  int y = ARG_INT(args[2], ctx);
+  int width = ARG_INT(args[3], ctx);
   int height = ARG_INT(args[4], ctx);
   
   RECT rect;
@@ -256,59 +260,90 @@ static void SetWindowPosition(const FunctionCallbackInfo<Value> & args) {
   MoveWindow(hwnd, x, y, width, height, TRUE);
 }
 
+typedef struct {
+  const int x;
+  const int y;
+  const int width;
+  const int height;
+  char * outputFile;
+  ScreenshotBuffer buf;
+} ScreenshotContext;
+
 static void ScreenshotWindow(const FunctionCallbackInfo<Value> & args) {
   Isolate * isolate = args.GetIsolate();
   Local<Context> ctx = isolate->GetCurrentContext();
   
   HWND hwnd = reinterpret_cast<HWND>(args[0]->ToBigInt(ctx).ToLocalChecked()->Uint64Value());
   
-  const int x    = ARG_INT(args[1], ctx);
-  const int y    = ARG_INT(args[2], ctx);
-  const int width  = ARG_INT(args[3], ctx);
-  const int height = ARG_INT(args[4], ctx);
-  
-  Screenshot sc(x, y, width, height);
+  ScreenshotContext * sctx = new ScreenshotContext {
+    static_cast<int>(ARG_INT(args[1], ctx)),
+    static_cast<int>(ARG_INT(args[2], ctx)),
+    static_cast<int>(ARG_INT(args[3], ctx)),
+    static_cast<int>(ARG_INT(args[4], ctx)),
+    nullptr,
+    { nullptr, 0 }
+  };
 
-  if (args.Length() == 6) {
-    const char * file = *(String::Utf8Value(isolate, args[5]));
-    sc.save(file);
-  } else {
-    ScreenshotBuffer buf = { nullptr, 0 };
-    sc.buffer(&buf);
+  if (args.Length() == 7) {
+    sctx->outputFile = *(String::Utf8Value(isolate, args[6]));
+  }
+
+  AsyncWorker worker = NewAsyncWorker(isolate, args[5], sctx);
+
+  worker->Run([](void * rawPtr) -> void {
+    ScreenshotContext * sctxPtr = reinterpret_cast<ScreenshotContext *>(rawPtr);
     
-    Local<Array> buffer = Array::New(isolate, buf.size);
-    
-    buf.size--;
-    while (buf.size) {
-      buffer->Set(ctx, buf.size, Number::New(isolate, static_cast<double>(buf.buffer[buf.size])));
-      
-      if (buf.size == 0) {
+    Screenshot sc(sctxPtr->x, sctxPtr->y, sctxPtr->width, sctxPtr->height);
+
+    if (sctxPtr->outputFile != nullptr) {
+      sc.save(sctxPtr->outputFile);
+    } else {
+      sc.buffer(&sctxPtr->buf);
+    }
+  }, [](void * rawPtr, Resolver * resolver) -> void {
+    ScreenshotContext * sctxPtr = reinterpret_cast<ScreenshotContext *>(rawPtr);
+
+    if (sctxPtr->outputFile != nullptr) {
+      return resolver->Resolve(0, nullptr);
+    }
+
+    Isolate * innerIsolate = resolver->GetIsolate();
+    Local<Context> innerContext = innerIsolate->GetCurrentContext();
+    Local<Array> output = Array::New(innerIsolate, sctxPtr->buf.size);
+
+    sctxPtr->buf.size--;
+    while (sctxPtr->buf.size) {
+      output->Set(innerContext, sctxPtr->buf.size, Number::New(innerIsolate, static_cast<double>(sctxPtr->buf.buffer[sctxPtr->buf.size])));
+
+      if (sctxPtr->buf.size == 0) {
         break;
       }
-      
-      buf.size--;
+
+      sctxPtr->buf.size--;
     }
-    
-    ARG(args, buffer);
-    delete[] buf.buffer;
-  }
+
+    delete[] sctxPtr->buf.buffer;
+
+    Local<Value> outputArr[] = { output };
+    resolver->Resolve(1, outputArr);
+  });
 }
 
 BINDING_MAIN(exports, module, context) {
   Binding binding(exports, context);
   
   ConstantBindingExport(binding, "enumerateWindows", EnumerateWindows);
-  ConstantBindingExport(binding, "setForeground",  SetForeground);
-  ConstantBindingExport(binding, "getForeground",  GetForeground);
-  ConstantBindingExport(binding, "getDesktop",     GetDesktop);
-  ConstantBindingExport(binding, "close",      Close);
-  ConstantBindingExport(binding, "getTitle",     GetTitle);
-  ConstantBindingExport(binding, "getClass",     GetClass);
-  ConstantBindingExport(binding, "console",      Console);
-  ConstantBindingExport(binding, "boundaries",     WindowBoundaries);
-  ConstantBindingExport(binding, "screenshot",     ScreenshotWindow);
-  ConstantBindingExport(binding, "setWindowPos",   SetWindowPosition);
-  ConstantBindingExport(binding, "getHwndFromPath",  GetHwndFromPath);
-  ConstantBindingExport(binding, "getWindowStyles",  GetWindowStyles);
-  ConstantBindingExport(binding, "showWindow",     ShowWindowFunc);
+  ConstantBindingExport(binding, "setForeground", SetForeground);
+  ConstantBindingExport(binding, "getForeground", GetForeground);
+  ConstantBindingExport(binding, "getDesktop", GetDesktop);
+  ConstantBindingExport(binding, "close", Close);
+  ConstantBindingExport(binding, "getTitle", GetTitle);
+  ConstantBindingExport(binding, "getClass", GetClass);
+  ConstantBindingExport(binding, "console", Console);
+  ConstantBindingExport(binding, "boundaries", WindowBoundaries);
+  ConstantBindingExport(binding, "screenshot", ScreenshotWindow);
+  ConstantBindingExport(binding, "setWindowPos", SetWindowPosition);
+  ConstantBindingExport(binding, "getHwndFromPath", GetHwndFromPath);
+  ConstantBindingExport(binding, "getWindowStyles", GetWindowStyles);
+  ConstantBindingExport(binding, "showWindow", ShowWindowFunc);
 }

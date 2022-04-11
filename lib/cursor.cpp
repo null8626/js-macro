@@ -60,19 +60,19 @@ static void SendCursorEvent(const FunctionCallbackInfo<Value> & args) {
   switch (ARG_INT(args[0], ctx)) {
     case 0: {
       down = MOUSEEVENTF_LEFTDOWN;
-      up   = MOUSEEVENTF_LEFTUP;
+      up = MOUSEEVENTF_LEFTUP;
       break;
     }
     
     case 1: {
       down = MOUSEEVENTF_RIGHTDOWN;
-      up   = MOUSEEVENTF_RIGHTUP;
+      up = MOUSEEVENTF_RIGHTUP;
       break;
     }
     
     default: {
       down = MOUSEEVENTF_MIDDLEDOWN;
-      up   = MOUSEEVENTF_MIDDLEUP;
+      up = MOUSEEVENTF_MIDDLEUP;
     }
   }
   
@@ -111,8 +111,8 @@ static void GetCursorPosition(const FunctionCallbackInfo<Value> & args) {
 BINDING_MAIN(exports, module, context) {
   Binding binding(exports, context);
   
-  ConstantBindingExport(binding, "moveCursor",        MoveCursor);
-  ConstantBindingExport(binding, "sendCursorEvent",     SendCursorEvent);
-  ConstantBindingExport(binding, "getCursorPos",      GetCursorPosition);
-  ConstantBindingExport(binding, "isHoveringOn",      IsHoveringOn);
+  ConstantBindingExport(binding, "moveCursor", MoveCursor);
+  ConstantBindingExport(binding, "sendCursorEvent", SendCursorEvent);
+  ConstantBindingExport(binding, "getCursorPos", GetCursorPosition);
+  ConstantBindingExport(binding, "isHoveringOn", IsHoveringOn);
 }

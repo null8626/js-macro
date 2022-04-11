@@ -15,7 +15,8 @@
       "sources": [
         "<(root_dir)/lib/main.cpp",
         "<(root_dir)/lib/screenshot.cpp",
-        "<(root_dir)/lib/window.cpp"
+        "<(root_dir)/lib/window.cpp",
+        "<(root_dir)/lib/async.cpp"
       ],
       "include_dirs": [ "<(root_dir)/include" ],
       "libraries": [
@@ -57,7 +58,8 @@
       "target_name": "clipboard",
       "sources": [
         "<(root_dir)/lib/main.cpp",
-        "<(root_dir)/lib/clipboard.cpp"
+        "<(root_dir)/lib/clipboard.cpp",
+        "<(root_dir)/lib/async.cpp"
       ],
       "libraries": [
         "user32.lib"

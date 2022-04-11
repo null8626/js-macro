@@ -1,15 +1,12 @@
 import { validateInt } from "./util.js";
 import { windowStyles, extendedWindowStyles } from "./constants.js";
-import { Worker } from "node:worker_threads";
-import { resolve, join } from "node:path";
+import { join } from "node:path";
 import { inspect } from "node:util";
 import { Buffer } from "node:buffer";
 import { fileURLToPath } from "node:url";
 
 // eslint-disable-next-line
 const window = require(fileURLToPath(join(import.meta.url, "..", "..", "build", "Release", "window.node")));
-
-const WORKER_PATH: string = fileURLToPath(join(import.meta.url, "..", "screenshot.js"));
 
 // rust <3
 export type Option<T> = T | null;
@@ -114,15 +111,11 @@ export default class Window extends ChildWindow {
       throw new TypeError("Invalid string.");
     }
 
-    return new Promise(promiseResolve => {
-      const worker: Worker = new Worker(WORKER_PATH, {
-        workerData: { ptr: this.memoryLocation.toString(), x, y, file: file ? resolve(file) : null, ...boundaries }
-      });
-
+    return new Promise(resolve => {
       if (file === null) {
-        worker.on("message", buf => promiseResolve(Buffer.from(buf)));
+        window.screenshot(x, y, boundaries.width, boundaries.height, (buf: number[]) => resolve(Buffer.from(buf)));
       } else {
-        worker.on("exit", () => promiseResolve());
+        window.screenshot(x, y, boundaries.width, boundaries.height, resolve, file);
       }
     });
   }

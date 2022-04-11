@@ -20,4 +20,3 @@ lib/
 .prettierrc
 .editorconfig
 tsconfig.json
-install.mjs

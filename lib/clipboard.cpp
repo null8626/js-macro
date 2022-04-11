@@ -1,3 +1,4 @@
+#include "async.hpp"
 #include "main.hpp"
 
 #include <shlobj_core.h>
@@ -120,8 +121,7 @@ static HGLOBAL MakeHtmlString(const char * url, const int url_s, const char * ht
     global = ::GlobalAlloc(GHND, 190 + url_s + html_s);
     ptr = reinterpret_cast<char *>(::GlobalLock(global));
     
-    ::sprintf(ptr,
-      "Version:0.9\r\n"
+    ::sprintf(ptr, "Version:0.9\r\n"
       "StartHTML:0000000000\r\n"
       "EndHTML:0000000000\r\n"
       "StartFragment:0000000000\r\n"
@@ -141,8 +141,7 @@ static HGLOBAL MakeHtmlString(const char * url, const int url_s, const char * ht
     global = ::GlobalAlloc(GHND, 178ULL + html_s);
     ptr = reinterpret_cast<char *>(::GlobalLock(global));
     
-    ::sprintf(ptr,
-      "Version:0.9\r\n"
+    ::sprintf(ptr, "Version:0.9\r\n"
       "StartHTML:0000000105\r\n"
       "EndHTML:0000000000\r\n"
       "StartFragment:0000000141\r\n"
@@ -220,7 +219,7 @@ static void CopyFiles(const FunctionCallbackInfo<Value> & args) {
   DROPFILES * df = reinterpret_cast<DROPFILES *>(ptr);
 
   df->pFiles = sizeof(DROPFILES);
-  df->fWide  = TRUE;
+  df->fWide = TRUE;
   
   hdrop_size = sizeof(DROPFILES);
   for (i = 0; i < args_size; i++) {
@@ -257,6 +256,12 @@ static void CopyHTML(const FunctionCallbackInfo<Value> & args) {
   
   ::CloseClipboard();
 }
+
+typedef struct {
+  wchar_t * dest_dir;
+  const int dest_dir_len;
+  HANDLE handle;
+} PasteContext;
 
 static void Paste(const FunctionCallbackInfo<Value> & args) {
   Isolate * isolate = args.GetIsolate();
@@ -318,36 +323,46 @@ static void Paste(const FunctionCallbackInfo<Value> & args) {
   
   switch (type) {
     case CF_UNICODETEXT: {
-      ARG(args, String::NewFromTwoByte(isolate,
-        reinterpret_cast<uint16_t *>(::GlobalLock(handle)), NewStringType::kNormal,
-        (::GlobalSize(handle) / sizeof(wchar_t)) - 1).ToLocalChecked());
+      ARG(args, String::NewFromTwoByte(isolate, reinterpret_cast<uint16_t *>(::GlobalLock(handle)), NewStringType::kNormal, (::GlobalSize(handle) / sizeof(wchar_t)) - 1).ToLocalChecked());
       
       break;
     }
     
     case CF_HDROP: {
-      HDROP hdrop = reinterpret_cast<HDROP>(::GlobalLock(handle));
-      
       String::Value value(isolate, args[1]);
-      wchar_t * dest_dir = (wchar_t *)(*value);
-      const int dest_dir_len = value.length();
-      
-      wchar_t * src_file_name;
-      
-      wchar_t * dest_path = nullptr;
-      unsigned short dest_path_len;
-      
-      wchar_t src_path[262];
-      short src_path_len;
-      
-      const uint32_t count = ::DragQueryFileW(hdrop, 0xFFFFFFFF, nullptr, 0);
-      
-      for (uint32_t i = 0; i < count; i++) {
-        src_file_name = ::GetFileNameFromPath(src_path, (src_path_len = static_cast<short>(::DragQueryFileW(hdrop, i, src_path, 262))));
+
+      PasteContext * pctx = new PasteContext {
+        (wchar_t *)(*value),
+        value.length(),
+        handle
+      };
+
+      AsyncWorker worker = NewAsyncWorker(isolate, args[2], pctx);
+
+      worker->Run([](void * rawPtr) -> void {
+        PasteContext * pctxPtr = reinterpret_cast<PasteContext *>(rawPtr);
+
+        HDROP hdrop = reinterpret_cast<HDROP>(::GlobalLock(pctxPtr->handle));
+  
+        wchar_t * src_file_name;
         
-        ::CombinePaths(&dest_path, &dest_path_len, dest_dir, dest_dir_len, src_file_name, &src_path[0] + src_path_len - src_file_name);
-        ::CopyFileW(src_path, dest_path, FALSE);
-      }
+        wchar_t * dest_path = nullptr;
+        unsigned short dest_path_len;
+        
+        wchar_t src_path[262];
+        short src_path_len;
+        
+        const uint32_t count = ::DragQueryFileW(hdrop, 0xFFFFFFFF, nullptr, 0);
+        
+        for (uint32_t i = 0; i < count; i++) {
+          src_file_name = ::GetFileNameFromPath(src_path, (src_path_len = static_cast<short>(::DragQueryFileW(hdrop, i, src_path, 262))));
+          
+          ::CombinePaths(&dest_path, &dest_path_len, pctxPtr->dest_dir, pctxPtr->dest_dir_len, src_file_name, &src_path[0] + src_path_len - src_file_name);
+          ::CopyFileW(src_path, dest_path, FALSE);
+        }
+      }, [](void * rawPtr, Resolver * resolver) -> void {
+        resolver->Resolve(0, nullptr);
+      });
     }
   }
   
@@ -391,8 +406,7 @@ static void PasteHTML(const FunctionCallbackInfo<Value> & args) {
     obj->Set(ctx, STRING_LITERAL(isolate, "version"), String::NewFromUtf8(isolate, map["Version"].c_str()).ToLocalChecked());
     
     const int startFragment = ::atoi(map["StartFragment"].c_str());
-    obj->Set(ctx, STRING_LITERAL(isolate, "html"), String::NewFromUtf8(isolate, ptr + startFragment,
-        NewStringType::kNormal, ::atoi(map["EndFragment"].c_str()) - startFragment).ToLocalChecked());
+    obj->Set(ctx, STRING_LITERAL(isolate, "html"), String::NewFromUtf8(isolate, ptr + startFragment, NewStringType::kNormal, ::atoi(map["EndFragment"].c_str()) - startFragment).ToLocalChecked());
     
     if (map.find("SourceURL") != map.end()) {
       obj->Set(ctx, STRING_LITERAL(isolate, "url"), String::NewFromUtf8(isolate, map["SourceURL"].c_str()).ToLocalChecked());

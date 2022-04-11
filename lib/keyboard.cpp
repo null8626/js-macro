@@ -5,7 +5,7 @@ void KeyboardType(const FunctionCallbackInfo<Value> & args) {
   Local<Context> ctx = isolate->GetCurrentContext();
   
   if (args[0]->IsNumber()) {
-    const int vk   = ARG_INT(args[0], ctx);
+    const int vk = ARG_INT(args[0], ctx);
     const int type = ARG_INT(args[1], ctx);
     
     if (type == 42069) {

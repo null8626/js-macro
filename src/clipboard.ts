@@ -1,4 +1,3 @@
-import { Worker } from "node:worker_threads";
 import { resolve, join } from "node:path";
 import { Buffer } from "node:buffer";
 import { fileURLToPath } from "node:url";
@@ -34,10 +33,7 @@ export function paste(): void {
 }
 
 export function pasteFiles(dir: string): Promise<void> {
-  return new Promise(promiseResolve => {
-    const worker: Worker = new Worker(WORKER_FILE_NAME, { workerData: { dir: resolve(dir) } });
-    worker.on("exit", () => promiseResolve());
-  });
+  return new Promise(promiseResolve => clipboard.paste(15, dir, promiseResolve));
 }
 
 export function pasteAll(): void {

@@ -95,13 +95,7 @@ void Screenshot::save(const char * filename) {
   png_init_io(png, fp);
   
   png_set_IHDR(
-    png,
-    info,
-    _width, _height, 8,
-    PNG_COLOR_TYPE_RGBA,
-    PNG_INTERLACE_NONE,
-    PNG_COMPRESSION_TYPE_DEFAULT,
-    PNG_FILTER_TYPE_DEFAULT
+    png, info, _width, _height, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT
   );
 
   png_write_info(png, info);
@@ -114,13 +108,7 @@ void Screenshot::save(const char * filename) {
 
 void Screenshot::buffer(ScreenshotBuffer * buff) {
   png_set_IHDR(
-    png,
-    info,
-    _width, _height, 8,
-    PNG_COLOR_TYPE_RGBA,
-    PNG_INTERLACE_NONE,
-    PNG_COMPRESSION_TYPE_DEFAULT,
-    PNG_FILTER_TYPE_DEFAULT
+    png, info, _width, _height, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT
   );
   
   png_set_write_fn(png, buff, pngWriteFunc, nullptr);
