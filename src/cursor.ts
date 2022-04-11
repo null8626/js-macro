@@ -1,10 +1,11 @@
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { validateInt } from "./util.js";
 import Window from "./windowImpl.js";
+import { createRequire } from "node:module";
+
+const require: NodeRequire = createRequire(import.meta.url);
 
 // eslint-disable-next-line
-const cursor = require(fileURLToPath(join(import.meta.url, "..", "..", "build", "Release", "cursor.node")));
+const cursor = require("../build/Release/cursor.node");
 
 export function move(x: number, y: number): void {
   validateInt(x, y);

@@ -1,9 +1,10 @@
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import Window from "./windowImpl.js";
+import { createRequire } from "node:module";
+
+const require: NodeRequire = createRequire(import.meta.url);
 
 // eslint-disable-next-line
-const window = require(fileURLToPath(join(import.meta.url, "..", "..", "build", "Release", "window.node")));
+const window = require("../build/Release/window.node");
 
 export function all(): Window[] {
   return window.enumerateWindows().map((ptr: BigInt) => new Window(ptr));

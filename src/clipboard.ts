@@ -1,14 +1,14 @@
-import { resolve, join } from "node:path";
+import { resolve } from "node:path";
 import { Buffer } from "node:buffer";
-import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
+
+const require: NodeRequire = createRequire(import.meta.url);
 
 // eslint-disable-next-line
-const clipboard = require(fileURLToPath(join(import.meta.url, "..", "..", "build", "Release", "clipboard.node")));
+const clipboard = require("../build/Release/clipboard.node");
 
 // rust <3
 export type Option<T> = T | undefined | null;
-
-const WORKER_FILE_NAME: string = fileURLToPath(join(import.meta.url, "..", "pasteFiles.js"));
 
 export function empty(): void {
   clipboard.empty();

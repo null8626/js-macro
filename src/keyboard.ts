@@ -1,9 +1,10 @@
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { virtualKeyCodes } from "./constants.js";
+import { createRequire } from "node:module";
+
+const require: NodeRequire = createRequire(import.meta.url);
 
 // eslint-disable-next-line
-const keyboard = require(fileURLToPath(join(import.meta.url, "..", "..", "build", "Release", "keyboard.node")));
+const keyboard = require("../build/Release/keyboard.node");
 
 export type EmptyFunction = () => void;
 

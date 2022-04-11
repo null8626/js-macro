@@ -1,12 +1,13 @@
 import { validateInt } from "./util.js";
 import { windowStyles, extendedWindowStyles } from "./constants.js";
-import { join } from "node:path";
 import { inspect } from "node:util";
 import { Buffer } from "node:buffer";
-import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
+
+const require: NodeRequire = createRequire(import.meta.url);
 
 // eslint-disable-next-line
-const window = require(fileURLToPath(join(import.meta.url, "..", "..", "build", "Release", "window.node")));
+const window = require("../build/Release/window.node");
 
 // rust <3
 export type Option<T> = T | null;
@@ -114,9 +115,9 @@ export default class Window extends ChildWindow {
 
     return new Promise(resolve => {
       if (options.file) {
-        window.screenshot(options.x, options.y, options.width, options.height, resolve, options.file);
+        window.screenshot(this.memoryLocation, options.x, options.y, options.width, options.height, resolve, options.file);
       } else {
-        window.screenshot(options.x, options.y, options.width, options.height, (buf: number[]) => resolve(Buffer.from(buf)));
+        window.screenshot(this.memoryLocation, options.x, options.y, options.width, options.height, (buf: number[]) => resolve(Buffer.from(buf)));
       }
     });
   }
