@@ -19,8 +19,8 @@
       ],
       "include_dirs": [ "<(root_dir)/include" ],
       "libraries": [
-        "-l<(root_dir)/zlib.lib",
-        "-l<(root_dir)/libpng.lib",
+        "-l<(root_dir)/bin/zlib1.lib",
+        "-l<(root_dir)/bin/libpng16_static.lib",
         "gdi32.lib",
         "user32.lib"
       ],

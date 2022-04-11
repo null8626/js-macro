@@ -5,8 +5,8 @@
 #include <png.h>
 
 typedef struct {
-    unsigned char * buffer;
-    size_t size;
+  unsigned char * buffer;
+  size_t size;
 } ScreenshotBuffer;
 
 class Screenshot {

@@ -1,1 +1,4 @@
 include/*.h linguist-vendored=true
+bin/*.lib binary linguist-vendored=true
+install.mjs linguist-vendored=true
+binding.gyp linguist-vendored=true

@@ -1,19 +1,52 @@
 {
-    "name": "js-macro",
-    "description": "A npm package that lets you automate your windows desktop.",
-    "version": "1.0.8",
-    "main": "./src/index.js",
-    "homepage": "https://github.com/vierofernando/js-macro",
-    "repository": "git://github.com/vierofernando/js-macro.git",
-    "keywords": [
-        "automation",
-        "win32",
-        "macros"
+  "name": "js-macro",
+  "version": "1.1.0",
+  "description": "A npm package that lets you automate your windows desktop.",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "os": [
+    "win32"
+  ],
+  "scripts": {
+    "install": "node install.mjs",
+    "prepare": "npx prettier --write src/**/*.ts",
+    "test": "npx eslint src/**/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vierofernando/js-macro.git"
+  },
+  "keywords": [
+    "automation",
+    "win32",
+    "windows",
+    "macros"
+  ],
+  "author": {
+    "name": "vierofernando",
+    "email": "vierofernando9@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vierofernando/js-macro/issues",
+    "email": "vierofernando9@gmail.com"
+  },
+  "homepage": "https://github.com/vierofernando/js-macro#readme",
+  "devDependencies": {
+    "@types/node": "17.0.23",
+    "@typescript-eslint/eslint-plugin": "5.18.0",
+    "@typescript-eslint/parser": "5.18.0",
+    "eslint": "8.12.0",
+    "node-gyp": "9.0.0",
+    "pre-commit": "1.2.2",
+    "prettier": "2.6.1",
+    "typescript": "4.6.3"
+  },
+  "pre-commit": {
+    "run": [
+      "prepare"
     ],
-    "author": "vierofernando",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/vierofernando/js-macro/issues"
-    },
-    "homepage": "https://github.com/vierofernando/js-macro#readme"
+    "silent": true
+  },
+  "type": "module"
 }
