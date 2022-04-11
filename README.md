@@ -29,31 +29,22 @@ cursor.leftClick();
 ```
 - Typing something on notepad
 ```js
-import { Worker, isMainThread } from "node:worker_threads";
-import { execSync } from "node:child_process";
+import { exec } from "node:child_process";
 import { window, keyboard } from "js-macro";
 
-if (!isMainThread) {
-    execSync("notepad.exe");
-} else {
-    // we don't want for execSync to wait for notepad to exit,
-    // so we should use a worker instead
-    void new Worker(__filename);
+void exec("notepad.exe");
+setTimeout(() => {
+    let notepad = window.find("notepad.exe");
     
-    // wait for notepad to start
-    setTimeout(() => {
-        let notepad = window.find("notepad.exe");
-        
-        if (!notepad.length) {
-            return console.error("error: cannot find notepad :(");
-        }
-        
-        // window.find returns an array - use the first element
-        notepad[0].focus();
-        
-        keyboard.type("Hello, World!");
-    }, 1000);
-}
+    if (!notepad.length) {
+        return console.error("error: cannot find notepad :(");
+    }
+    
+    // window.find returns an array - use the first element
+    notepad[0].focus();
+    
+    keyboard.type("Hello, World!");
+}, 1000);
 ```
 - Copying and pasting programmatically!
 ```js
