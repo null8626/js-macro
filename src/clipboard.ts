@@ -10,6 +10,10 @@ export type Option<T> = T | undefined | null;
 
 const WORKER_FILE_NAME: string = fileURLToPath(join(import.meta.url, "..", "pasteFiles.js"));
 
+export function empty(): void {
+  clipboard.empty();
+}
+
 export function copy(str: string): void {
   clipboard.copy(`${str.replace(/\r?\n/g, "\r\n").replace(/\0/g, "\uFFFD")}\0`);
 }
@@ -33,7 +37,7 @@ export function paste(): void {
 }
 
 export function pasteFiles(dir: string): Promise<void> {
-  return new Promise(promiseResolve => clipboard.paste(15, dir, promiseResolve));
+  return new Promise(promiseResolve => clipboard.paste(15, resolve(dir), promiseResolve));
 }
 
 export function pasteAll(): void {
