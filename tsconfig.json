@@ -15,6 +15,7 @@
     "allowJs": true,
     "outDir": "dist",
     "esModuleInterop": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "removeComments": true
   }
 }
