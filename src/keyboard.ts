@@ -1,10 +1,10 @@
-import { virtualKeyCodes } from "./constants.js";
-import { createRequire } from "node:module";
+import { virtualKeyCodes } from './constants.js';
+import { createRequire } from 'node:module';
 
 const require: NodeRequire = createRequire(import.meta.url);
 
 // eslint-disable-next-line
-const keyboard = require("../build/Release/keyboard.node");
+const keyboard = require('../build/Release/keyboard.node');
 
 export type EmptyFunction = () => void;
 

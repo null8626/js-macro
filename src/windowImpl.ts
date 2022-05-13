@@ -1,13 +1,13 @@
-import { validateInt } from "./util.js";
-import { windowStyles, extendedWindowStyles } from "./constants.js";
-import { inspect } from "node:util";
-import { Buffer } from "node:buffer";
-import { createRequire } from "node:module";
+import { validateInt } from './util.js';
+import { windowStyles, extendedWindowStyles } from './constants.js';
+import { inspect } from 'node:util';
+import { Buffer } from 'node:buffer';
+import { createRequire } from 'node:module';
 
 const require: NodeRequire = createRequire(import.meta.url);
 
 // eslint-disable-next-line
-const window = require("../build/Release/window.node");
+const window = require('../build/Release/window.node');
 
 // rust <3
 export type Option<T> = T | null;
@@ -30,13 +30,13 @@ class ChildWindow {
   private ptr: BigInt;
   private jsClassName: string;
 
-  constructor(ptr: BigInt, name: string = "ChildWindow") {
+  constructor(ptr: BigInt, name: string = 'ChildWindow') {
     this.ptr = ptr;
     this.jsClassName = name;
   }
 
   [inspect.custom](): string {
-    return `${this.jsClassName}(0x${this.ptr.toString(16).padStart(8, "0")})`;
+    return `${this.jsClassName}(0x${this.ptr.toString(16).padStart(8, '0')})`;
   }
 
   get memoryLocation(): BigInt {
@@ -91,7 +91,7 @@ export interface ScreenshotOptions {
 
 export default class Window extends ChildWindow {
   constructor(ptr: BigInt) {
-    super(ptr, "Window");
+    super(ptr, 'Window');
   }
 
   focus(): void {
@@ -109,8 +109,8 @@ export default class Window extends ChildWindow {
 
     validateInt(options.x, options.y, options.width!, options.height!);
 
-    if (options.file && (typeof options.file !== "string" || !options.file.length || /[\u0100-\uffff\0]/g.test(options.file))) {
-      throw new TypeError("Invalid string.");
+    if (options.file && (typeof options.file !== 'string' || !options.file.length || /[\u0100-\uffff\0]/g.test(options.file))) {
+      throw new TypeError('Invalid string.');
     }
 
     return new Promise(resolve => {

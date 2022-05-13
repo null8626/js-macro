@@ -1,10 +1,10 @@
-import Window from "./windowImpl.js";
-import { createRequire } from "node:module";
+import Window from './windowImpl.js';
+import { createRequire } from 'node:module';
 
 const require: NodeRequire = createRequire(import.meta.url);
 
 // eslint-disable-next-line
-const window = require("../build/Release/window.node");
+const window = require('../build/Release/window.node');
 
 export function all(): Window[] {
   return window.enumerateWindows().map((ptr: BigInt) => new Window(ptr));
@@ -23,5 +23,5 @@ export function console(): Window {
 }
 
 export function find(path: string): Window[] {
-  return window.getHwndFromPath(path.replace(/\0/g, "\uFFFD")).map((x: BigInt) => new Window(x));
+  return window.getHwndFromPath(path.replace(/\0/g, '\uFFFD')).map((x: BigInt) => new Window(x));
 }

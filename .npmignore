@@ -16,7 +16,7 @@ lib/
 .gitattributes
 .github/
 .vscode/
-.eslintrc
-.prettierrc
+.eslintrc.json
+.prettierrc.json
 .editorconfig
 tsconfig.json

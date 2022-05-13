@@ -10,14 +10,17 @@
 [downloads-url]: https://npmjs.org/package/js-macro
 
 A npm package that lets you automate your windows desktop.
+
 ```
 npm i js-macro
 ```
 
 ## Examples
+
 - Simple cursor usage
+
 ```js
-import { cursor } from "js-macro";
+import { cursor } from 'js-macro';
 
 cursor.position();
 // { x: 679, y: 0 }
@@ -27,36 +30,42 @@ cursor.move(0, 0);
 
 cursor.leftClick();
 ```
-- Typing something on notepad
-```js
-import { exec } from "node:child_process";
-import { window, keyboard } from "js-macro";
 
-void exec("notepad.exe");
+- Typing something on notepad
+
+```js
+import { exec } from 'node:child_process';
+import { window, keyboard } from 'js-macro';
+
+void exec('notepad.exe');
 setTimeout(() => {
-    let notepad = window.find("notepad.exe");
-    
-    if (!notepad.length) {
-        return console.error("error: cannot find notepad :(");
-    }
-    
-    // window.find returns an array - use the first element
-    notepad[0].focus();
-    
-    keyboard.type("Hello, World!");
+  let notepad = window.find('notepad.exe');
+
+  if (!notepad.length) {
+    return console.error('error: cannot find notepad :(');
+  }
+
+  // window.find returns an array - use the first element
+  notepad[0].focus();
+
+  keyboard.type('Hello, World!');
 }, 1000);
 ```
-- Copying and pasting programmatically!
-```js
-import { clipboard } from "js-macro";
 
-clipboard.copy("Hello, World!");
+- Copying and pasting programmatically!
+
+```js
+import { clipboard } from 'js-macro';
+
+clipboard.copy('Hello, World!');
 
 clipboard.paste();
 // returns "Hello, World!"
 ```
+
 - Screenshotting a window, or your desktop (like print-screen!)
-> The buffers will ALWAYS be in a **PNG** format.
+  > The buffers will ALWAYS be in a **PNG** format.
+
 ```js
 import { window } from "js-macro";
 const desktop = window.desktop();
@@ -76,6 +85,7 @@ desktop.screenshot({
 ```
 
 # Building locally
+
 ```cmd
 git clone https://github.com/vierofernando/js-macro.git
 cd js-macro
