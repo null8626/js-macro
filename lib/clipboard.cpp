@@ -262,7 +262,7 @@ typedef struct {
   const int dest_dir_len;
   HANDLE handle;
 } PasteContext;
-#include <stdio.h>
+
 static void Paste(const FunctionCallbackInfo<Value> & args) {
   Isolate * isolate = args.GetIsolate();
   Local<Context> ctx = isolate->GetCurrentContext();
