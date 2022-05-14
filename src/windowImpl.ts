@@ -102,7 +102,7 @@ export default class Window extends ChildWindow {
     window.close(this.memoryLocation);
   }
 
-  screenshot(options: ScreenshotOptions): Promise<void | Buffer> {
+  screenshot(options: ScreenshotOptions): Promise<Option<Buffer>> {
     if (!options.width || !options.height) {
       Object.assign(options, this.getBoundaries());
     }
@@ -117,7 +117,7 @@ export default class Window extends ChildWindow {
       if (options.file) {
         window.screenshot(this.memoryLocation, options.x, options.y, options.width, options.height, resolve, options.file);
       } else {
-        window.screenshot(this.memoryLocation, options.x, options.y, options.width, options.height, (buf: number[]) => resolve(Buffer.from(buf)));
+        window.screenshot(this.memoryLocation, options.x, options.y, options.width, options.height, resolve);
       }
     });
   }
