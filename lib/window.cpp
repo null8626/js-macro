@@ -310,22 +310,10 @@ static void ScreenshotWindow(const FunctionCallbackInfo<Value> & args) {
     Isolate * innerIsolate = resolver->GetIsolate();
     Local<Context> innerContext = innerIsolate->GetCurrentContext();
     
-    Local<Value> output[] = { Array::New(innerIsolate, sctxPtr->buf.size) };
-    Local<Array> array = Local<Array>::Cast(output[0]);
-
-    sctxPtr->buf.size--;
-    while (sctxPtr->buf.size) {
-      array->Set(innerContext, sctxPtr->buf.size, Number::New(innerIsolate, static_cast<double>(sctxPtr->buf.buffer[sctxPtr->buf.size])));
-
-      if (sctxPtr->buf.size == 0) {
-        break;
-      }
-
-      sctxPtr->buf.size--;
-    }
-
-    delete[] sctxPtr->buf.buffer;
-
+    Local<Value> output[] = {
+      Binding::NewBuffer(innerIsolate, sctxPtr->buf.buffer, sctxPtr->buf.size)
+    };
+    
     resolver->Resolve(1, output);
   });
 }

@@ -32,16 +32,16 @@ export function copyHTML(html: string, url: Option<string>): void {
   }
 }
 
-export function paste(): void {
-  clipboard.paste(13);
+export function paste(): string {
+  return clipboard.paste(13);
 }
 
 export function pasteFiles(dir: string): Promise<void> {
   return new Promise(promiseResolve => clipboard.paste(15, resolve(dir), promiseResolve));
 }
 
-export function pasteAll(): void {
-  clipboard.paste(Buffer.allocUnsafe);
+export function pasteAll(): Record<string, Option<Buffer>> {
+  return clipboard.paste();
 }
 
 export interface HTML {

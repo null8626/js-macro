@@ -257,6 +257,27 @@ static void CopyHTML(const FunctionCallbackInfo<Value> & args) {
   ::CloseClipboard();
 }
 
+static void CopyV8Object(const FunctionCallbackInfo<Value> & args) {
+  Isolate * isolate = args.GetIsolate();
+  
+  String::Utf8Value html(isolate, args[0]);
+  HGLOBAL mem;
+  
+  if (args.Length() == 1) {
+    mem = ::MakeHtmlString(nullptr, 0, *html, html.length());
+  } else {
+    String::Utf8Value url(isolate, args[1]);
+    mem = ::MakeHtmlString(*url, url.length(), *html, html.length());
+  }
+  
+  ::OpenClipboard(nullptr);
+  ::EmptyClipboard();
+  
+  ::SetClipboardData(::RegisterClipboardFormatA("HTML Format"), mem);
+  
+  ::CloseClipboard();
+}
+
 typedef struct {
   wchar_t * dest_dir;
   const int dest_dir_len;
@@ -268,13 +289,10 @@ static void Paste(const FunctionCallbackInfo<Value> & args) {
   Local<Context> ctx = isolate->GetCurrentContext();
   ::OpenClipboard(nullptr);
   
-  if (args[0]->IsFunction()) {
+  if (args.Length() == 0) {
     Local<Object> result = Object::New(isolate);
-    Local<Object> allocUnsafe = args[0]->ToObject(ctx).ToLocalChecked();
-    Local<Object> global = ctx->Global();
     UINT format = 0;
     
-    Local<Value> _args[1];
     unsigned char * ptr;
     HANDLE handle;
     uint32_t len;
@@ -288,21 +306,10 @@ static void Paste(const FunctionCallbackInfo<Value> & args) {
       } else {
         len = static_cast<uint32_t>(::GlobalSize(handle));
         
-        _args[0] = Number::New(isolate, static_cast<double>(len));
-        Local<Object> buffer = allocUnsafe->CallAsFunction(ctx, global, 1, _args).ToLocalChecked()->ToObject(ctx).ToLocalChecked();
+        void * copied_ptr = ::malloc(len);
+        memcpy(copied_ptr, ptr, len);
         
-        len--;
-        while (1) {
-          buffer->Set(ctx, len, Number::New(isolate, static_cast<double>(ptr[len])));
-          
-          if (len == 0) {
-            break;
-          }
-          
-          len--;
-        }
-        
-        result->Set(ctx, str, buffer);
+        result->Set(ctx, str, Binding::NewBuffer(isolate, copied_ptr, len));
       }
       
       ::GlobalUnlock(handle);
@@ -324,7 +331,6 @@ static void Paste(const FunctionCallbackInfo<Value> & args) {
   switch (type) {
     case CF_UNICODETEXT: {
       ARG(args, String::NewFromTwoByte(isolate, reinterpret_cast<uint16_t *>(::GlobalLock(handle)), NewStringType::kNormal, (::GlobalSize(handle) / sizeof(wchar_t)) - 1).ToLocalChecked());
-      
       break;
     }
     

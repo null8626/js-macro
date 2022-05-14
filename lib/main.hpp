@@ -2,6 +2,7 @@
 #define MAIN_HPP
 
 #include <windows.h>
+#include <node_buffer.h>
 #include <node.h>
 
 using namespace v8;
@@ -32,13 +33,14 @@ class Binding {
   
   public:
     Binding(Local<Object> exports, Local<Context> ctx);
-    inline void Export(const char * name, FunctionCallback callback, const size_t size) {
-      ctxFuncTemplate = FunctionTemplate::New(isolate, callback);
-      ctxFunc = ctxFuncTemplate->GetFunction(context).ToLocalChecked();
-      
-      funcname = String::NewFromUtf8(isolate, name, NewStringType::kInternalized, size - 1).ToLocalChecked();
-      ctxFunc->SetName(funcname);
-      exports->Set(context, funcname, ctxFunc);
+    void Export(const char * name, FunctionCallback callback, const size_t size);
+    
+    static void DeleterCallback(char * data, void * deleter_data) {
+      ::free(reinterpret_cast<void *>(data));
+    }
+
+    static inline Local<Object> NewBuffer(Isolate * isolate, void * data, size_t data_size) {
+      return node::Buffer::New(isolate, reinterpret_cast<char *>(data), data_size, Binding::DeleterCallback, nullptr).ToLocalChecked();
     }
 };
 
