@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vierofernando/js-macro.git"
+    "url": "git+https://github.com/null8626/js-macro.git"
   },
   "keywords": [
     "automation",
@@ -23,15 +23,15 @@
     "macros"
   ],
   "author": {
-    "name": "vierofernando",
-    "email": "vierofernando9@gmail.com"
+    "name": "null8626",
+    "email": "null86269@gmail.com"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/vierofernando/js-macro/issues",
-    "email": "vierofernando9@gmail.com"
+    "url": "https://github.com/null8626/js-macro/issues",
+    "email": "null86269@gmail.com"
   },
-  "homepage": "https://github.com/vierofernando/js-macro#readme",
+  "homepage": "https://github.com/null8626/js-macro#readme",
   "devDependencies": {
     "@types/node": "^17.0.23",
     "@typescript-eslint/eslint-plugin": "^5.23.0",

@@ -1,7 +1,7 @@
 # js-macro [![CI][ci-image]][ci-url] [![npm][npm-image]][npm-url] [![downloads][downloads-image]][downloads-url] [![prettier][prettier-image]][prettier-url]
 
-[ci-image]: https://github.com/vierofernando/js-macro/actions/workflows/lint.yml/badge.svg?branch=main
-[ci-url]: https://github.com/vierofernando/js-macro/actions/workflows/lint.yml
+[ci-image]: https://github.com/null8626/js-macro/actions/workflows/lint.yml/badge.svg?branch=main
+[ci-url]: https://github.com/null8626/js-macro/actions/workflows/lint.yml
 [prettier-image]: https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square
 [prettier-url]: https://github.com/prettier/prettier
 [npm-image]: https://img.shields.io/npm/v/js-macro.svg
@@ -87,7 +87,7 @@ desktop.screenshot({
 # Building locally
 
 ```cmd
-git clone https://github.com/vierofernando/js-macro.git
+git clone https://github.com/null8626/js-macro.git
 cd js-macro
 npm install --save-dev --ignore-scripts
 npm run install
