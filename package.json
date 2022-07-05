@@ -27,9 +27,6 @@
   "engines": {
     "node": ">= 10"
   },
-  "os": [
-    "win32"
-  ],
   "scripts": {
     "artifacts": "napi artifacts",
     "build": "napi build --platform --release",
