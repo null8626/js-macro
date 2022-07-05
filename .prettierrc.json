@@ -1,7 +1,0 @@
-{
-  "singleQuote": true,
-  "printWidth": 150,
-  "trailingComma": "none",
-  "arrowParens": "avoid",
-  "htmlWhitespaceSensitivity": "ignore"
-}

@@ -1,0 +1,26 @@
+name: prettier
+on:
+  push:
+    branches:
+      - main
+    tags-ignore:
+      - '**'
+    paths:
+      - 'src/*.rs'
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ATiltedTree/setup-rust@v1
+        with:
+          rust-version: stable
+      - name: Prettier!
+        run: cargo fmt
+      - name: Commit
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'chore: prettier'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

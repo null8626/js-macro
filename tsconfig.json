@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*.ts"],
+  "files": ["index.ts"],
   "compilerOptions": {
     "declaration": true,
     "noImplicitAny": true,
@@ -10,10 +10,9 @@
     "noUnusedParameters": true,
     "strict": true,
     "strictFunctionTypes": true,
-    "module": "ES2020",
+    "module": "ES2022",
     "target": "es2022",
     "allowJs": true,
-    "outDir": "dist",
     "esModuleInterop": true,
     "moduleResolution": "node",
     "removeComments": true

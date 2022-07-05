@@ -1,9 +1,5 @@
-# js-macro [![CI][ci-image]][ci-url] [![npm][npm-image]][npm-url] [![downloads][downloads-image]][downloads-url] [![prettier][prettier-image]][prettier-url]
+# js-macro [![npm][npm-image]][npm-url] [![downloads][downloads-image]][downloads-url]
 
-[ci-image]: https://github.com/null8626/js-macro/actions/workflows/lint.yml/badge.svg?branch=main
-[ci-url]: https://github.com/null8626/js-macro/actions/workflows/lint.yml
-[prettier-image]: https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square
-[prettier-url]: https://github.com/prettier/prettier
 [npm-image]: https://img.shields.io/npm/v/js-macro.svg
 [npm-url]: https://npmjs.org/package/js-macro
 [downloads-image]: https://img.shields.io/npm/dm/js-macro.svg
@@ -11,48 +7,44 @@
 
 A npm package that lets you automate your windows desktop.
 
-```
-npm i js-macro
-```
-
 ## Examples
 
-- Simple cursor usage
+### Simple cursor usage
 
 ```js
-import { cursor } from 'js-macro';
+import { mouse } from 'js-macro';
 
-cursor.position();
+mouse.pos();
 // { x: 679, y: 0 }
 
-cursor.move(0, 0);
+moouse.move(0, 0);
 // cursor is now at the very left top of the screen
 
-cursor.leftClick();
+mouse.leftClick();
 ```
 
-- Typing something on notepad
+### Typing something on notepad
 
 ```js
 import { exec } from 'node:child_process';
-import { window, keyboard } from 'js-macro';
+import { Window, keyboard } from 'js-macro';
 
-void exec('notepad.exe');
-setTimeout(() => {
-  let notepad = window.find('notepad.exe');
+exec('notepad.exe');
 
-  if (!notepad.length) {
+setTimeout(async () => {
+  let notepad = await Window.fromProcess('notepad.exe');
+
+  if (!notepad) {
     return console.error('error: cannot find notepad :(');
   }
 
-  // window.find returns an array - use the first element
-  notepad[0].focus();
+  notepad.focus();
 
   keyboard.type('Hello, World!');
 }, 1000);
 ```
 
-- Copying and pasting programmatically!
+### Copying and pasting programmatically!
 
 ```js
 import { clipboard } from 'js-macro';
@@ -63,32 +55,31 @@ clipboard.paste();
 // returns "Hello, World!"
 ```
 
-- Screenshotting a window, or your desktop (like print-screen!)
-  > The buffers will ALWAYS be in a **PNG** format.
+### Screenshotting a specific location
 
 ```js
-import { window } from "js-macro";
-const desktop = window.desktop();
+import { Screenshot } from "js-macro";
 
-desktop.screenshot({
+const screenshot = new Screenshot({
   x: 0,
-  y: 0,
-  file: "file.png"
-}).then(() => console.log("screenshotted!"));
+  y: 0, 
+  width: 150,
+  height: 150
+});
 
-desktop.screenshot({
-  x: 0,
-  y: 0,
-  width: 500,
-  height: 500
-}).then(buf => /* ... */);
+// take screenshot and write it to a file
+await screenshot.file("file.png");
 ```
 
-# Building locally
+### Screenshotting your desktop (like print-screen!)
 
-```cmd
-git clone https://github.com/null8626/js-macro.git
-cd js-macro
-npm install --save-dev --ignore-scripts
-npm run install
+```js
+import { Screenshot, Format } from "js-macro";
+
+// providing no arguments will screenshot the current monitor/screen
+const screenshot = new Screenshot();
+
+// take screenshot and write it to a Buffer in a PNG format
+// p.s: we also support JPEG!
+const buf = await screenshot.buffer(Format.Png);
 ```
