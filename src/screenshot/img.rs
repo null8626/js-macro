@@ -1,11 +1,15 @@
 use core::slice;
 use std::{
+  convert::AsRef,
   ffi::c_void,
-  mem::{size_of, MaybeUninit}, convert::AsRef, ops::Deref, io::Cursor, path::Path,
+  io::Cursor,
+  mem::{size_of, MaybeUninit},
+  ops::Deref,
+  path::Path,
 };
 
 use crate::screenshot::{Format, Screenshot};
-use image::{ImageBuffer, Rgba, ImageResult};
+use image::{ImageBuffer, ImageResult, Rgba};
 use napi::{Error, Result, Status};
 use windows_sys::Win32::{Graphics::Gdi::*, System::Memory::*};
 
@@ -40,22 +44,18 @@ impl Pixels {
 
   #[inline(always)]
   pub(crate) fn as_pixels(&mut self) -> &mut [RawPixel] {
-    unsafe {
-      slice::from_raw_parts_mut(self.ptr as *mut RawPixel, self.size / 4)
-    }
+    unsafe { slice::from_raw_parts_mut(self.ptr as *mut RawPixel, self.size / 4) }
   }
 
   #[inline(always)]
   pub(crate) fn as_slice(&self) -> &[u8] {
-    unsafe {
-      slice::from_raw_parts(self.ptr as _, self.size)
-    }
+    unsafe { slice::from_raw_parts(self.ptr as _, self.size) }
   }
 }
 
 impl Deref for Pixels {
   type Target = [u8];
-  
+
   #[inline(always)]
   fn deref(&self) -> &Self::Target {
     self.as_slice()
@@ -87,9 +87,9 @@ impl Image {
     unsafe {
       let hdc = CreateCompatibleDC(0);
       let bitmap = CreateCompatibleBitmap(GetDC(0), sc.width, sc.height);
-      
+
       SelectObject(hdc, bitmap);
-      
+
       BitBlt(
         hdc,
         0,
@@ -101,19 +101,19 @@ impl Image {
         sc.y,
         SRCCOPY,
       );
-      
+
       let mut bmp: BITMAP = MaybeUninit::uninit().assume_init();
       let mut info: BITMAPINFO = MaybeUninit::zeroed().assume_init();
 
       let current_dc = CreateCompatibleDC(0);
       SelectObject(current_dc, bitmap);
-      
+
       GetObjectA(
         bitmap,
         size_of::<BITMAP>() as _,
         &mut bmp as *mut BITMAP as *mut c_void,
       );
-      
+
       bmp.bmWidth = sc.width;
       bmp.bmHeight = -sc.height;
 
@@ -140,20 +140,18 @@ impl Image {
       DeleteDC(hdc);
       DeleteDC(current_dc);
       DeleteObject(bitmap);
-      
+
       sc.consumed = true;
 
       for p in pixels.as_pixels() {
         let blue = p.blue;
-  
+
         p.blue = p.red;
         p.red = blue;
       }
-  
+
       match ImageBuffer::from_raw(sc.width as _, sc.height as _, pixels) {
-        Some(image) => Ok(Self {
-          image
-        }),
+        Some(image) => Ok(Self { image }),
 
         None => Err(Error::new(
           Status::GenericFailure,
@@ -170,7 +168,9 @@ impl Image {
 
   pub(crate) fn buffer(&self, format: Format) -> ImageResult<Vec<u8>> {
     let mut buf = Vec::new();
-    self.image.write_to(&mut Cursor::new(&mut buf), format.image_format())?;
+    self
+      .image
+      .write_to(&mut Cursor::new(&mut buf), format.image_format())?;
 
     Ok(buf)
   }
