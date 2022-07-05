@@ -1,4 +1,4 @@
-use crate::screenshot::{Image, Format, Screenshot};
+use crate::screenshot::{Format, Image, Screenshot};
 use napi::{Env, Error, JsArrayBuffer, JsBuffer, Result, Status, Task};
 use std::intrinsics::transmute;
 
@@ -23,7 +23,10 @@ impl Task for ArrayBuffer<'_> {
 
     match img.buffer(self.format) {
       Ok(r) => Ok(r),
-      Err(_) => Err(Error::new(Status::GenericFailure, String::from("Cannot write screenshot to buffer."))),
+      Err(_) => Err(Error::new(
+        Status::GenericFailure,
+        String::from("Cannot write screenshot to buffer."),
+      )),
     }
   }
 
@@ -41,9 +44,7 @@ pub struct Buffer<'a> {
 impl<'a> Buffer<'a> {
   #[inline(always)]
   pub fn new(sc: &'a mut Screenshot, format: Format) -> Self {
-    unsafe {
-      transmute(ArrayBuffer::new(sc, format))
-    }
+    unsafe { transmute(ArrayBuffer::new(sc, format)) }
   }
 }
 
