@@ -31,7 +31,7 @@ impl Finder {
 
 unsafe extern "system" fn window_finder_proc(hwnd: isize, lparam: isize) -> i32 {
   if IsWindowVisible(hwnd) == 0 {
-    return 0;
+    return 1;
   }
 
   let ptr: *mut Finder = transmute(lparam);
@@ -40,7 +40,7 @@ unsafe extern "system" fn window_finder_proc(hwnd: isize, lparam: isize) -> i32 
   GetWindowThreadProcessId(hwnd, &mut proc_id);
   let process = OpenProcess(PROCESS_QUERY_INFORMATION, 0, proc_id);
   if process == 0 {
-    return 0;
+    return 1;
   }
 
   match (*ptr).kind {
@@ -57,7 +57,7 @@ unsafe extern "system" fn window_finder_proc(hwnd: isize, lparam: isize) -> i32 
         || ((*ptr).requested_name.len() as u32) > image_name_size
       {
         CloseHandle(process);
-        return 0;
+        return 1;
       }
 
       CloseHandle(process);
@@ -72,13 +72,13 @@ unsafe extern "system" fn window_finder_proc(hwnd: isize, lparam: isize) -> i32 
         Some(s) => {
           if s.to_lowercase() == (*ptr).requested_name {
             (*ptr).output.replace(hwnd);
-            1
-          } else {
             0
+          } else {
+            1
           }
         }
 
-        None => 0,
+        None => 1,
       }
     }
 
@@ -96,9 +96,9 @@ unsafe extern "system" fn window_finder_proc(hwnd: isize, lparam: isize) -> i32 
       {
         (*ptr).output.replace(hwnd);
 
-        1
-      } else {
         0
+      } else {
+        1
       }
     }
   }

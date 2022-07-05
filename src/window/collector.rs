@@ -28,7 +28,7 @@ unsafe extern "system" fn window_collector_proc(hwnd: isize, lparam: isize) -> i
     (*ptr).output.push(transmute(hwnd));
   }
 
-  0
+  1
 }
 
 #[napi]
