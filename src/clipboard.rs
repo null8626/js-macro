@@ -4,7 +4,7 @@ pub mod clipboard_namespace {
   use napi::{Error, JsString, Result, Status};
   use windows_sys::Win32::{
     Foundation::SetLastError,
-    System::{DataExchange::*, Memory::*},
+   System::{DataExchange::*, Memory::*},
   };
 
   #[napi]
