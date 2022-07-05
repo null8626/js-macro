@@ -17,7 +17,7 @@ import { mouse } from 'js-macro';
 mouse.pos();
 // { x: 679, y: 0 }
 
-moouse.move(0, 0);
+mouse.move(0, 0);
 // cursor is now at the very left top of the screen
 
 mouse.leftClick();
