@@ -10,6 +10,7 @@ env:
     tags-ignore:
       - '**'
     paths:
+      - '.github/workflows/**'
       - 'src/**/*.rs'
   pull_request: null
 jobs:
@@ -85,7 +86,7 @@ jobs:
           node-version: 18
           check-latest: true
       - name: Install dependencies
-        run: npm run install
+        run: npm install --save-dev
       - name: Download all artifacts
         uses: actions/download-artifact@v3
         with:
