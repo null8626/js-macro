@@ -11,7 +11,7 @@ env:
       - '**'
     paths:
       - '.github/workflows/**'
-      - 'src/**/*.rs'
+      - 'src/**'
   pull_request: null
 jobs:
   build:
