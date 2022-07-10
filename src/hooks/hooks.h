@@ -14,7 +14,7 @@ typedef void (* HookCleanupCallback)(LPVOID);
 #include "mouse.h"
 #include "keyboard.h"
 
-typedef struct HOOK_ELEMENT {
+typedef struct HOOK_ELEMENT                         {
   HANDLE hThread;
   const HOOKPROC lpHookProc;
   const int dwHookId;

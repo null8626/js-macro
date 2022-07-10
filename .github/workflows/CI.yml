@@ -10,7 +10,7 @@ env:
     tags-ignore:
       - '**'
     paths:
-      - '.github/workflows/**'
+      - '.github/workflows/CI.yml'
       - 'src/**'
   pull_request: null
 jobs:
