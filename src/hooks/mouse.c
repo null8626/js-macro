@@ -1,10 +1,10 @@
 #include "mouse.h"
 
-static LRESULT InnerMouseHookCallback(int code, WPARAM wParam, LPARAM lParam);
+static LRESULT CALLBACK InnerMouseHookCallback(int code, WPARAM wParam, LPARAM lParam);
 
 static HOOK_ELEMENT Mouse = HOOK_ELEMENT_NEW(InnerMouseHookCallback, WH_MOUSE_LL);
 
-static LRESULT WINAPI InnerMouseHookCallback(int code, WPARAM wParam, LPARAM lParam) {
+static LRESULT CALLBACK InnerMouseHookCallback(int code, WPARAM wParam, LPARAM lParam) {
   if (code == HC_ACTION && (wParam == WM_LBUTTONUP || wParam == WM_RBUTTONUP || wParam == WM_MBUTTONUP)) {
     MSLLHOOKSTRUCT * lpData = (MSLLHOOKSTRUCT *)lParam;
     MOUSE_DATA mData = { lpData->pt, wParam };

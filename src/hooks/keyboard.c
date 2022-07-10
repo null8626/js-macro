@@ -1,10 +1,10 @@
 #include "keyboard.h"
 
-static LRESULT InnerKeyboardHookCallback(int code, WPARAM wParam, LPARAM lParam);
+static LRESULT CALLBACK InnerKeyboardHookCallback(int code, WPARAM wParam, LPARAM lParam);
 
 static HOOK_ELEMENT Keyboard = HOOK_ELEMENT_NEW(InnerKeyboardHookCallback, WH_KEYBOARD_LL);
 
-static LRESULT WINAPI InnerKeyboardHookCallback(int code, WPARAM wParam, LPARAM lParam) {
+static LRESULT CALLBACK InnerKeyboardHookCallback(int code, WPARAM wParam, LPARAM lParam) {
   if (code == HC_ACTION && (wParam == WM_KEYUP || wParam == WM_SYSKEYUP)) {
     KEYBOARD_DATA kbData = { ((KBDLLHOOKSTRUCT *)lParam)->vkCode };
 
