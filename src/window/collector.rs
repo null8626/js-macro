@@ -1,4 +1,4 @@
-use crate::window::Window;
+use super::Window;
 use napi::{Env, Result, Task};
 use std::intrinsics::transmute;
 use windows_sys::Win32::UI::WindowsAndMessaging::*;

@@ -12,9 +12,9 @@ A npm package that lets you automate your windows desktop.
 ### Simple cursor usage
 
 ```js
-import { mouse } from 'js-macro';
+const { mouse } = require('js-macro');
 
-mouse.pos();
+mouse.position();
 // { x: 679, y: 0 }
 
 mouse.move(0, 0);
@@ -26,8 +26,8 @@ mouse.leftClick();
 ### Typing something on notepad
 
 ```js
-import { exec } from 'node:child_process';
-import { Window, keyboard } from 'js-macro';
+const { exec } = require('node:child_process');
+const { Window, keyboard } = require('js-macro');
 
 exec('notepad.exe');
 
@@ -47,18 +47,56 @@ setTimeout(async () => {
 ### Copying and pasting programmatically!
 
 ```js
-import { clipboard } from 'js-macro';
+const { clipboard } = require('js-macro');
 
 clipboard.copy('Hello, World!');
 
 clipboard.paste();
-// returns "Hello, World!"
+// returns 'Hello, World!'
+```
+
+### Click-logging!
+
+```js
+const { clicklogger } = require('js-macro');
+
+// add a listener on every left click
+// we support left, middle, and right clicks!
+clicklogger.on('left', coord => console.log(coord));
+
+// start logging!
+clicklogger.start();
+
+// do stuff here... then
+// while not required, this is highly recommended
+clicklogger.stop();
+```
+
+### Keylogging!
+
+```js
+const { keylogger } = require('js-macro');
+
+// add a listener on every word (after space is pressed)
+// we support raw keys, characters, words, and lines!
+
+// please note that this listens directly to your keyboard
+// which means that it can't read things like keyboard shortcuts (e.g: clipboard)
+// or shited keys directly.
+keylogger.on('word', text => console.log(text));
+
+// start logging!
+keylogger.start();
+
+// do stuff here... then
+// while not required, this is highly recommended
+keylogger.stop();
 ```
 
 ### Screenshotting a specific location
 
 ```js
-import { Screenshot } from "js-macro";
+const { Screenshot } = require('js-macro');
 
 const screenshot = new Screenshot({
   x: 0,
@@ -68,18 +106,18 @@ const screenshot = new Screenshot({
 });
 
 // take screenshot and write it to a file
-await screenshot.file("file.png");
+await screenshot.file('file.png');
 ```
 
 ### Screenshotting your desktop (like print-screen!)
 
 ```js
-import { Screenshot, Format } from "js-macro";
+const { Screenshot } = require('js-macro');
 
 // providing no arguments will screenshot the current monitor/screen
 const screenshot = new Screenshot();
 
 // take screenshot and write it to a Buffer in a PNG format
-// p.s: we also support JPEG!
-const buf = await screenshot.buffer(Format.Png);
+// the format can be 'png' or 'jpeg'
+const buf = await screenshot.buffer('png');
 ```

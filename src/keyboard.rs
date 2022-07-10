@@ -1,5 +1,5 @@
-#[napi(js_name = "keyboard")]
-pub mod keyboard_namespace {
+#[napi]
+pub mod keyboard {
   use napi::{bindgen_prelude::ToNapiValue, Error, JsString, Result, Status};
   use std::mem::{size_of, MaybeUninit};
   use windows_sys::Win32::UI::Input::KeyboardAndMouse::*;
@@ -60,38 +60,36 @@ pub mod keyboard_namespace {
 
   impl KeyCode {
     fn into_input(self, flags: u32) -> INPUT {
-      let mut input: INPUT = unsafe { MaybeUninit::zeroed().assume_init() };
-      let mut input_union: INPUT_0 = unsafe { MaybeUninit::zeroed().assume_init() };
+      unsafe {
+        let mut input: INPUT = MaybeUninit::zeroed().assume_init();
+        let mut input_union: INPUT_0 = MaybeUninit::zeroed().assume_init();
 
-      input.r#type = INPUT_KEYBOARD;
-      input_union.ki.wVk = self as u16;
-      input_union.ki.dwFlags = flags;
-      input.Anonymous = input_union;
+        input.r#type = INPUT_KEYBOARD;
+        input_union.ki.wVk = self as u16;
+        input_union.ki.dwFlags = flags;
+        input.Anonymous = input_union;
 
-      input
+        input
+      }
     }
   }
 
   #[napi]
-  pub fn hold(code: KeyCode) {
-    unsafe {
-      let input = code.into_input(0);
-      SendInput(1, &input, size_of::<INPUT>() as _);
-    }
+  pub unsafe fn hold(code: KeyCode) {
+    let input = code.into_input(0);
+    SendInput(1, &input, size_of::<INPUT>() as _);
   }
 
   #[napi]
-  pub fn release(code: KeyCode) {
-    unsafe {
-      let input = code.into_input(KEYEVENTF_KEYUP);
-      SendInput(1, &input, size_of::<INPUT>() as _);
-    }
+  pub unsafe fn release(code: KeyCode) {
+    let input = code.into_input(KEYEVENTF_KEYUP);
+    SendInput(1, &input, size_of::<INPUT>() as _);
   }
 
   #[napi(js_name = "type")]
-  pub fn type_text(text: JsString) -> Result<()> {
-    let mut input: INPUT = unsafe { MaybeUninit::zeroed().assume_init() };
-    let mut ki: INPUT_0 = unsafe { MaybeUninit::zeroed().assume_init() };
+  pub unsafe fn type_text(text: JsString) -> Result<()> {
+    let mut input: INPUT = MaybeUninit::zeroed().assume_init();
+    let mut ki: INPUT_0 = MaybeUninit::zeroed().assume_init();
 
     let codes = text.into_utf16()?;
 
@@ -122,9 +120,7 @@ pub mod keyboard_namespace {
       ));
     }
 
-    unsafe {
-      SendInput(inputs.len() as _, inputs.as_ptr(), size_of::<INPUT>() as _);
-    }
+    SendInput(inputs.len() as _, inputs.as_ptr(), size_of::<INPUT>() as _);
 
     Ok(())
   }

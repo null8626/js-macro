@@ -8,8 +8,8 @@ use std::{
   path::Path,
 };
 
-use crate::screenshot::{Format, Screenshot};
-use image::{ImageBuffer, ImageResult, Rgba};
+use super::Screenshot;
+use image::{ImageBuffer, ImageFormat, ImageResult, Rgba};
 use napi::{Error, Result, Status};
 use windows_sys::Win32::{Graphics::Gdi::*, System::Memory::*};
 
@@ -162,15 +162,13 @@ impl Image {
   }
 
   #[inline(always)]
-  pub(crate) fn file<P: AsRef<Path>>(&self, p: P, format: Format) -> ImageResult<()> {
-    self.image.save_with_format(p, format.image_format())
+  pub(crate) fn file<P: AsRef<Path>>(&self, p: P, format: ImageFormat) -> ImageResult<()> {
+    self.image.save_with_format(p, format)
   }
 
-  pub(crate) fn buffer(&self, format: Format) -> ImageResult<Vec<u8>> {
+  pub(crate) fn buffer(&self, format: ImageFormat) -> ImageResult<Vec<u8>> {
     let mut buf = Vec::new();
-    self
-      .image
-      .write_to(&mut Cursor::new(&mut buf), format.image_format())?;
+    self.image.write_to(&mut Cursor::new(&mut buf), format)?;
 
     Ok(buf)
   }

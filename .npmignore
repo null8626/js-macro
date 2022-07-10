@@ -1,5 +1,9 @@
+**/*.o
+**/*.a
+**/*.lib
 target
 Cargo.lock
+Cargo.toml
 .cargo
 .github
 npm
@@ -8,5 +12,8 @@ tsconfig.json
 rustfmt.toml
 yarn.lock
 src/
-index.ts
+build.rs
+main.ts
+main.d.ts
+index.js
 *.node

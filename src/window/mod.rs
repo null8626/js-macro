@@ -1,12 +1,24 @@
 mod collector;
 mod finder;
 
-use crate::{screenshot::Screenshot, Boundaries, Coordinates};
+use crate::screenshot::Screenshot;
 use collector::Collector;
 use finder::Finder;
 use napi::{bindgen_prelude::AsyncTask, Error, Result, Status};
 use std::mem::MaybeUninit;
 use windows_sys::Win32::{System::Console::GetConsoleWindow, UI::WindowsAndMessaging::*};
+
+#[napi(object)]
+pub struct Boundaries {
+  pub width: i32,
+  pub height: i32,
+}
+
+#[napi(object)]
+pub struct Coordinates {
+  pub x: i32,
+  pub y: i32,
+}
 
 #[derive(Clone)]
 #[napi]

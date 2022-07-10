@@ -1,6 +1,6 @@
 // NO this is not sponsored by macOS >:(
 
-use crate::window::Window;
+use super::Window;
 use core::slice;
 use napi::{Env, Result, Task};
 use std::{intrinsics::transmute, mem::MaybeUninit};
@@ -38,6 +38,7 @@ unsafe extern "system" fn window_finder_proc(hwnd: isize, lparam: isize) -> i32 
 
   let mut proc_id = MaybeUninit::uninit().assume_init();
   GetWindowThreadProcessId(hwnd, &mut proc_id);
+
   let process = OpenProcess(PROCESS_QUERY_INFORMATION, 0, proc_id);
   if process == 0 {
     return 1;
@@ -45,8 +46,8 @@ unsafe extern "system" fn window_finder_proc(hwnd: isize, lparam: isize) -> i32 
 
   match (*ptr).kind {
     Kind::ProcessName => {
-      let mut image_name_ptr: [u16; MAX_PATH as _] = MaybeUninit::uninit().assume_init();
-      let mut image_name_size = MaybeUninit::uninit().assume_init();
+      let mut image_name_ptr: [u16; (MAX_PATH + 1) as _] = MaybeUninit::uninit().assume_init();
+      let mut image_name_size = MAX_PATH;
 
       if QueryFullProcessImageNameW(
         process,

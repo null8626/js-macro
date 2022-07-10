@@ -1,10 +1,6 @@
-use crate::Boundaries;
+use crate::window::Boundaries;
 use image::ImageFormat;
-use napi::{
-  bindgen_prelude::{AsyncTask, ToNapiValue},
-  Error, Result, Status,
-};
-use std::path::Path;
+use napi::{bindgen_prelude::AsyncTask, Error, Result, Status};
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 
 mod img;
@@ -12,13 +8,11 @@ mod writer;
 pub(crate) use img::Image;
 
 #[napi(js_name = "screenBoundaries")]
-pub fn screen_boundaries() -> Boundaries {
-  unsafe {
-    let width = GetSystemMetrics(SM_CXSCREEN);
-    let height = GetSystemMetrics(SM_CYSCREEN);
+pub unsafe fn screen_boundaries() -> Boundaries {
+  let width = GetSystemMetrics(SM_CXSCREEN);
+  let height = GetSystemMetrics(SM_CYSCREEN);
 
-    Boundaries { width, height }
-  }
+  Boundaries { width, height }
 }
 
 #[napi(object)]
@@ -29,26 +23,14 @@ pub struct ScreenshotOptions {
   pub height: Option<i32>,
 }
 
-#[napi]
-pub enum Format {
-  Png,
-  Jpeg,
-}
-
-impl Format {
-  pub fn from_path(path: &str) -> Option<Self> {
-    match Path::new(path).extension()?.to_str()? {
-      "png" => Some(Format::Png),
-      "jpg" | "jpeg" => Some(Format::Jpeg),
-      _ => None,
-    }
-  }
-
-  pub const fn image_format(self) -> ImageFormat {
-    match self {
-      Self::Png => ImageFormat::Png,
-      Self::Jpeg => ImageFormat::Jpeg,
-    }
+fn get_format(s: &str) -> Result<ImageFormat> {
+  match s {
+    "png" => Ok(ImageFormat::Png),
+    "jpeg" | "jpg" => Ok(ImageFormat::Jpeg),
+    _ => Err(Error::new(
+      Status::InvalidArg,
+      String::from("Invalid format. expected formats: 'png', 'jpeg', 'jpg'"),
+    )),
   }
 }
 
@@ -66,7 +48,7 @@ pub struct Screenshot {
 impl Screenshot {
   #[napi(constructor)]
   pub fn new(options: Option<ScreenshotOptions>) -> Result<Self> {
-    let boundaries = screen_boundaries();
+    let boundaries = unsafe { screen_boundaries() };
 
     match options {
       Some(opt) => {
@@ -128,12 +110,18 @@ impl Screenshot {
   }
 
   #[napi(js_name = "arrayBuffer")]
-  pub fn array_buffer(&mut self, format: Format) -> AsyncTask<writer::ArrayBuffer> {
-    AsyncTask::new(writer::ArrayBuffer::new(self, format))
+  pub fn array_buffer(&mut self, format: String) -> Result<AsyncTask<writer::ArrayBuffer>> {
+    Ok(AsyncTask::new(writer::ArrayBuffer::new(
+      self,
+      get_format(&format)?,
+    )))
   }
 
   #[napi]
-  pub fn buffer(&mut self, format: Format) -> AsyncTask<writer::Buffer> {
-    AsyncTask::new(writer::Buffer::new(self, format))
+  pub fn buffer(&mut self, format: String) -> Result<AsyncTask<writer::Buffer>> {
+    Ok(AsyncTask::new(writer::Buffer::new(
+      self,
+      get_format(&format)?,
+    )))
   }
 }

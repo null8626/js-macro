@@ -1,15 +1,31 @@
-use crate::screenshot::{Format, Image, Screenshot};
+use image::ImageFormat;
 use napi::{Env, Error, JsArrayBuffer, JsBuffer, Result, Status, Task};
 use std::intrinsics::transmute;
+use std::path::Path;
+
+use super::{get_format, Image, Screenshot};
+
+fn format_from_path<P: AsRef<Path>>(p: &P) -> Result<ImageFormat> {
+  if let Some(e) = p.as_ref().extension() {
+    if let Some(ext) = e.to_str() {
+      return get_format(&ext.to_lowercase());
+    }
+  }
+
+  Err(Error::new(
+    Status::InvalidArg,
+    String::from("Invalid format. expected formats: 'png', 'jpeg', 'jpg'"),
+  ))
+}
 
 pub struct ArrayBuffer<'a> {
   sc: &'a mut Screenshot,
-  format: Format,
+  format: ImageFormat,
 }
 
 impl<'a> ArrayBuffer<'a> {
   #[inline(always)]
-  pub fn new(sc: &'a mut Screenshot, format: Format) -> Self {
+  pub fn new(sc: &'a mut Screenshot, format: ImageFormat) -> Self {
     Self { sc, format }
   }
 }
@@ -38,12 +54,12 @@ impl Task for ArrayBuffer<'_> {
 
 pub struct Buffer<'a> {
   sc: &'a mut Screenshot,
-  format: Format,
+  format: ImageFormat,
 }
 
 impl<'a> Buffer<'a> {
   #[inline(always)]
-  pub fn new(sc: &'a mut Screenshot, format: Format) -> Self {
+  pub fn new(sc: &'a mut Screenshot, format: ImageFormat) -> Self {
     unsafe { transmute(ArrayBuffer::new(sc, format)) }
   }
 }
@@ -65,24 +81,18 @@ impl<'a> Task for Buffer<'a> {
 
 pub struct File<'a> {
   sc: &'a mut Screenshot,
+  format: ImageFormat,
   path: String,
-  format: Format,
 }
 
 impl<'a> File<'a> {
+  #[inline(always)]
   pub fn new(sc: &'a mut Screenshot, path: String) -> Result<Self> {
-    match Format::from_path(&path) {
-      Some(f) => Ok(Self {
-        sc,
-        path,
-        format: f,
-      }),
-
-      None => Err(Error::new(
-        Status::InvalidArg,
-        String::from("Invalid file extension."),
-      )),
-    }
+    Ok(Self {
+      sc,
+      format: format_from_path(&path)?,
+      path,
+    })
   }
 }
 
