@@ -2,16 +2,14 @@
 
 #include "hooks.h"
 
-typedef struct MOUSE_DATA {
-  POINT pt;
-  WPARAM wParam;
+typedef struct MOUSE_DATA
+{
+    POINT pt;
+    WPARAM wParam;
 } MOUSE_DATA;
 
-void MouseHookStart(
-  HookCallback lpfnCallback,
-  HookAsyncCallback lpfnAsyncCallback,
-  HookCleanupCallback lpfnCleanupCallback
-);
+void MouseHookStart(HookCallback lpfnCallback, HookAsyncCallback lpfnAsyncCallback,
+                    HookCleanupCallback lpfnCleanupCallback);
 
-LPVOID * MouseHookData(void);
+LPVOID *MouseHookData(void);
 void MouseHookStop(void);

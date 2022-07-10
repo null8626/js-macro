@@ -2,15 +2,13 @@
 
 #include "hooks.h"
 
-typedef struct KEYBOARD_DATA {
-  DWORD dwCode;
+typedef struct KEYBOARD_DATA
+{
+    DWORD dwCode;
 } KEYBOARD_DATA;
 
-void KeyboardHookStart(
-  HookCallback lpfnCallback,
-  HookAsyncCallback lpfnAsyncCallback,
-  HookCleanupCallback lpfnCleanupCallback
-);
+void KeyboardHookStart(HookCallback lpfnCallback, HookAsyncCallback lpfnAsyncCallback,
+                       HookCleanupCallback lpfnCleanupCallback);
 
-LPVOID * KeyboardHookData(void);
+LPVOID *KeyboardHookData(void);
 void KeyboardHookStop(void);
