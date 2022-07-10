@@ -116,7 +116,7 @@ pub mod clicklogger {
       .create_threadsafe_function(0, |ctx: ThreadSafeCallContext<Coordinates>| {
         Ok(vec![ctx.value])
       })?;
-    
+
     (*data).insert(kind, tsfn);
 
     Ok(())
