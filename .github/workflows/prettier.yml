@@ -6,7 +6,7 @@ on:
     tags-ignore:
       - '**'
     paths:
-      - 'src/*.rs'
+      - 'src/**'
 jobs:
   build:
     name: Build
@@ -16,8 +16,12 @@ jobs:
       - uses: ATiltedTree/setup-rust@v1
         with:
           rust-version: stable
-      - name: Prettier!
+      - name: Prettier rust code!
         run: cargo fmt
+      - name: Prettier C source files!
+        run: clang-format -i src/hooks/*.c
+      - name: Prettier C header files!
+        run: clang-format -i src/hooks/*.h
       - name: Commit
         uses: EndBug/add-and-commit@v9
         with:
