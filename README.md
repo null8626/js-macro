@@ -82,7 +82,7 @@ const { keylogger } = require('js-macro');
 
 // please note that this listens directly to your keyboard
 // which means that it can't read things like keyboard shortcuts (e.g: clipboard)
-// or shited keys directly.
+// or shifted keys directly.
 keylogger.on('word', text => console.log(text));
 
 // start logging!
