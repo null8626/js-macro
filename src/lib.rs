@@ -7,7 +7,7 @@
 #![deny(clippy::all)]
 
 use napi::{Env, Result};
-use windows_sys::Win32::System::Console::*;
+use windows_sys::Win32::System::Console::*; 
 
 #[macro_use]
 extern crate napi_derive;
