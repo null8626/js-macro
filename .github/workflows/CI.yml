@@ -69,7 +69,7 @@ jobs:
         with:
           name: bindings-${{ matrix.settings.target }}
           path: |
-            node/${{ env.APP_NAME }}.*.node
+            ${{ env.APP_NAME }}.*.node
           if-no-files-found: error
   publish:
     name: Publish
