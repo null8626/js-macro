@@ -11,7 +11,6 @@ env:
     paths:
       - '.github/workflows/CI.yml'
       - 'src/**'
-  pull_request: null
 jobs:
   build:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
@@ -19,7 +18,7 @@ jobs:
       matrix:
         settings:
           - host: windows-latest
-            build: node ./node_modules/@napi-rs/cli/scripts/index.js build --platform
+            build: npm run build
             target: x86_64-pc-windows-msvc
             architecture: x64
           - host: windows-latest
@@ -89,10 +88,7 @@ jobs:
         with:
           path: artifacts
       - name: Move artifacts
-        run: node ./node_modules/@napi-rs/cli/scripts/index.js artifacts
-      - name: List packages
-        run: ls -R ./npm
-        shell: bash
+        run: npm artifacts
       - name: Publish 
         run: |
           npx tsc
