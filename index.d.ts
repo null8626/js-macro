@@ -72,11 +72,15 @@ export namespace clicklogger {
 export namespace keyboard {
   export const enum KeyCode {
     Backspace = 8,
+    Tab = 9,
+    Return = 13,
     Shift = 16,
     Control = 17,
     Alt = 18,
+    Pause = 19,
     CapsLock = 20,
     Escape = 27,
+    SpaceBar = 32,
     PageUp = 33,
     PageDown = 34,
     End = 35,
@@ -118,9 +122,23 @@ export namespace keyboard {
     F22 = 133,
     F23 = 134,
     F24 = 135,
+    NumLock = 144,
+    ScrollLock = 145,
+    LeftShift = 160,
+    RightShift = 161,
+    LeftControl = 162,
+    Rightontrol = 163,
+    LeftAlt = 164,
+    RightAlt = 165,
+    BrowserBack = 166,
+    BrowserForward = 167,
     VolumeMute = 173,
     VolumeDown = 174,
-    VolumeUp = 175
+    VolumeUp = 175,
+    MediaNextTrack = 176,
+    MediaPreviousTrack = 177,
+    MediaStop = 178,
+    MediaPlayPause = 179
   }
   export function hold(code: KeyCode): void
   export function release(code: KeyCode): void
