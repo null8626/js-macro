@@ -106,3 +106,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Commit index.d.ts
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: 'index.d.ts'
+          message: 'chore: update index.d.ts'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
