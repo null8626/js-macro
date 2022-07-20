@@ -32,6 +32,7 @@ export class Window {
   static console(): Window | null
   static fromProcess(name: string): Promise<Window>
   static fromTitle(name: string): Promise<Window>
+  static fromPid(pid: number): Promise<Window>
   static all(): Promise<Array<Window>>
   screenshot(): Screenshot
   position(): Coordinates

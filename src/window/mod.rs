@@ -82,6 +82,11 @@ impl Window {
     AsyncTask::new(Collector::new())
   }
 
+  #[napi(js_name = "fromPid")]
+  pub fn from_pid(pid: u32) -> AsyncTask<Finder> {
+    AsyncTask::new(Finder::new(finder::Kind::ProcessId, pid.to_string()))
+  }
+
   #[napi]
   pub fn screenshot(&self) -> Screenshot {
     unsafe {

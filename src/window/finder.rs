@@ -10,6 +10,7 @@ use windows_sys::Win32::{Foundation::*, System::Threading::*, UI::WindowsAndMess
 pub enum Kind {
   ProcessName,
   WindowTitle,
+  ProcessId,
 }
 
 pub struct Finder {
@@ -97,6 +98,17 @@ unsafe extern "system" fn window_finder_proc(hwnd: isize, lparam: isize) -> i32 
       {
         (*ptr).output.replace(hwnd);
 
+        0
+      } else {
+        1
+      }
+    }
+
+    Kind::ProcessId => {
+      CloseHandle(process);
+
+      if (*ptr).requested_name.parse::<u32>().unwrap() == proc_id {
+        (*ptr).output.replace(hwnd);
         0
       } else {
         1
