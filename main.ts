@@ -27,7 +27,7 @@ const cleanup: () => void = mod.cleanup;
 
 process.on('exit', cleanup);
 
-if (repl) {
+if (repl?.repl) {
   repl.repl.on('exit', cleanup);
 }
 
